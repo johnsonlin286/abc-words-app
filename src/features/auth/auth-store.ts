@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { ApiError, apiRequest } from "@/lib/api";
-import type { AuthSession, AuthUser } from "@/shared/contract";
+import type { AuthSession, AuthUser, DisplayNameInput } from "@/shared/contract";
 
 import { clearSession, loadSession, saveSession } from "./session-storage";
 
@@ -72,6 +72,16 @@ export async function getAccessToken(): Promise<string> {
       refreshing = null;
     });
   return (await refreshing).tokens.accessToken;
+}
+
+/** Choose or change the player name owned by this account (unique, checked by the server). */
+export async function setDisplayName(name: string): Promise<void> {
+  const body: DisplayNameInput = { name };
+  const user = await apiRequest<AuthUser>("/api/auth/me/name", { method: "PUT", body, token: await getAccessToken() });
+  if (!session) return;
+  const next = { ...session, user };
+  await saveSession(next);
+  setSignedIn(next);
 }
 
 /** Sign out on this device: revoke the refresh token on the server (best effort), then forget it. */

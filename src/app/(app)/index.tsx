@@ -22,7 +22,7 @@ export default function Home() {
     <Paper>
       <SafeAreaView className="flex-1 justify-center px-8">
         <NoteCard className="gap-4 p-5">
-          <Text className="font-sans-bold text-2xl text-ink">Kamu sudah masuk!</Text>
+          <Text className="font-sans-bold text-2xl text-ink">Halo, {user?.displayName}!</Text>
           <Text className="font-sans text-base leading-6 text-ink-soft">
             Masuk sebagai <Text className="font-sans-semibold text-ink">{user?.email ?? "akun Google"}</Text>.
             Lobi dan permainan menyusul di tahap berikutnya.

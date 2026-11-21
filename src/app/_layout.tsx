@@ -24,6 +24,7 @@ export default function RootLayout() {
     Kalam_700Bold,
   });
   const status = useAuthStore((s) => s.status);
+  const hasName = useAuthStore((s) => Boolean(s.user?.displayName));
   const ready = (fontsLoaded || fontError !== null) && status !== "loading";
 
   useEffect(() => {
@@ -39,12 +40,16 @@ export default function RootLayout() {
   if (!ready) return null;
 
   const signedIn = status === "signedIn";
+  // Signed in -> pick a name once -> the app. Each screen is only reachable in its own state.
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.paper } }}>
-        <Stack.Protected guard={signedIn}>
+        <Stack.Protected guard={signedIn && hasName}>
           <Stack.Screen name="(app)" />
+        </Stack.Protected>
+        <Stack.Protected guard={signedIn && !hasName}>
+          <Stack.Screen name="choose-name" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>
           <Stack.Screen name="login" />

@@ -20,7 +20,7 @@ export class ApiError extends Error {
   }
 }
 
-type RequestOptions = { method?: "GET" | "POST" | "DELETE"; body?: unknown; token?: string };
+type RequestOptions = { method?: "GET" | "POST" | "PUT" | "DELETE"; body?: unknown; token?: string };
 
 /** JSON request to the backend; returns `data` of `{ ok, data }` or throws ApiError. */
 export async function apiRequest<T>(path: string, { method, body, token }: RequestOptions = {}): Promise<T> {
