@@ -18,7 +18,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,13 +38,27 @@
           "imageWidth": 76
         }
       ],
-      "expo-audio",
-      "expo-asset"
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
+      "expo-asset",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#fdfbf4"
+    "backgroundColor": "#fdfbf4",
+    "extra": {
+      "eas": {
+        "projectId": "bbc39448-9ba5-46af-b002-1c252d24719e"
+      }
+    },
+    "owner": "johnson286"
   }
 }
