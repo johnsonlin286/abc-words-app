@@ -3,17 +3,24 @@ import "@/lib/nativewind-interop";
 
 import { Fredoka_400Regular, Fredoka_500Medium, Fredoka_600SemiBold, Fredoka_700Bold } from "@expo-google-fonts/fredoka";
 import { Kalam_700Bold } from "@expo-google-fonts/kalam";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { AppState, Platform } from "react-native";
 
 import { restoreSession, useAuthStore } from "@/features/auth/auth-store";
 import { colors } from "@/theme/tokens";
 
 SplashScreen.preventAutoHideAsync();
+
+// TanStack Query's "window focus" on a phone is the app coming back to the foreground: refetch then
+// (e.g. room keys that refilled while the app was in the background).
+if (Platform.OS !== "web") {
+  AppState.addEventListener("change", (state) => focusManager.setFocused(state === "active"));
+}
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());

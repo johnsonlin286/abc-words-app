@@ -6,16 +6,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { NoteCard } from "@/components/note-card";
 import { Paper } from "@/components/paper";
 import { useAuthStore } from "@/features/auth/auth-store";
+import { KeyChip } from "@/features/keys/key-chip";
 import { colors } from "@/theme/tokens";
 
-/** Temporary home until the lobby exists: a greeting and the way to Pengaturan. */
+/** Temporary home until the lobby exists: room keys, a greeting and the way to Pengaturan. */
 export default function Home() {
   const user = useAuthStore((s) => s.user);
 
   return (
     <Paper>
       <SafeAreaView className="flex-1 px-6">
-        <View className="flex-row justify-end pt-2">
+        <View className="flex-row items-center justify-between pt-2">
+          <KeyChip />
           <Link href="/settings" asChild>
             <Pressable
               accessibilityRole="button"
