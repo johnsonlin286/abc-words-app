@@ -1,4 +1,5 @@
 import "@/global.css";
+import "@/lib/nativewind-interop";
 
 import { Fredoka_400Regular, Fredoka_500Medium, Fredoka_600SemiBold, Fredoka_700Bold } from "@expo-google-fonts/fredoka";
 import { Kalam_700Bold } from "@expo-google-fonts/kalam";

@@ -16,8 +16,17 @@ export function TextField({ label, hint, error, onFocus, onBlur, ...props }: Pro
   return (
     <View className="gap-1.5">
       <Text className="font-sans-semibold text-sm text-ink">{label}</Text>
-      {/* The focus ring sits on a wrapper: a style prop on the TextInput itself drops NativeWind's padding. */}
-      <View style={{ borderRadius: 12, boxShadow: focused ? `0 0 0 3px ${colors.highlight}` : "none" }}>
+      {/* Highlighter focus ring as a rounded border on a wrapper (pulled out by its width so the layout
+          doesn't move). A style prop on the TextInput itself drops NativeWind's padding, and a spread
+          boxShadow draws square corners on some Android surfaces. */}
+      <View
+        style={{
+          margin: -3,
+          borderWidth: 3,
+          borderRadius: 15,
+          borderColor: focused ? colors.highlight : "transparent",
+        }}
+      >
         <TextInput
           accessibilityLabel={label}
           accessibilityHint={hint}
