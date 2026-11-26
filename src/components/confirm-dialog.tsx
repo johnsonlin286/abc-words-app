@@ -7,6 +7,7 @@ type Props = {
   title: string;
   message: string;
   confirmLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
   busy?: boolean;
@@ -16,7 +17,18 @@ type Props = {
 };
 
 /** A card over a dimmed page asking to confirm one action ("Batal" or the action). */
-export function ConfirmDialog({ visible, title, message, confirmLabel, onConfirm, onCancel, busy, error, danger }: Props) {
+export function ConfirmDialog({
+  visible,
+  title,
+  message,
+  confirmLabel,
+  cancelLabel = "Batal",
+  onConfirm,
+  onCancel,
+  busy,
+  error,
+  danger,
+}: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={busy ? () => {} : onCancel} statusBarTranslucent>
       <View className="flex-1 justify-center bg-ink/40 px-6">
@@ -33,7 +45,7 @@ export function ConfirmDialog({ visible, title, message, confirmLabel, onConfirm
               accessibilityRole="button"
               className="rounded-xl border-2 border-ink bg-white px-4 py-2.5 active:bg-highlight-soft"
             >
-              <Text className="font-sans-semibold text-base text-ink">Batal</Text>
+              <Text className="font-sans-semibold text-base text-ink">{cancelLabel}</Text>
             </Pressable>
             <Pressable
               onPress={onConfirm}

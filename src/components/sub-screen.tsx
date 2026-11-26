@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BackButton } from "./back-button";
@@ -10,7 +10,7 @@ export function SubScreen({ title, children }: { title: string; children: ReactN
   return (
     <Paper>
       <SafeAreaView className="flex-1">
-        <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <KeyboardAvoidingView className="flex-1" behavior="padding">
           <ScrollView
             contentContainerClassName="gap-5 px-8 pb-8 pt-2"
             keyboardShouldPersistTaps="handled"

@@ -50,7 +50,9 @@ export function KeysDialog({ visible, onClose }: { visible: boolean; onClose: ()
               1 kunci = 1 permainan. Kunci terpakai saat kamu menekan{" "}
               <Text className="font-sans-semibold text-ink">Mulai</Text> sebagai host.
             </Text>
-            <Text className="font-sans text-base leading-6 text-ink-soft">Ikut room teman selalu gratis.</Text>
+            <Text className="font-sans text-base leading-6 text-ink-soft">
+              Tanpa kunci kamu belum bisa membuat room. Ikut room teman selalu gratis.
+            </Text>
             <Text className="font-sans text-sm leading-5 text-ink-faint">
               {sameEveryStep
                 ? `Kunci baru datang setiap ${minutes} menit, maksimal ${max}.`

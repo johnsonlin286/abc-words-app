@@ -53,10 +53,12 @@ export async function signInWithIdToken(idToken: string): Promise<void> {
  * A valid access token for REST calls and the socket handshake, refreshed when close to expiry.
  * Single-flight: the server treats a refresh token used twice as stolen and ends the session, so
  * concurrent callers share one refresh. Offline keeps the session; only a rejected refresh signs out.
+ * `forceRefresh` skips the expiry check, for a token the server already refused.
  */
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken({ forceRefresh = false } = {}): Promise<string> {
   if (!session) throw new ApiError("UNAUTHORIZED", "Belum masuk.", 401);
-  if (session.tokens.accessTokenExpiresAt - REFRESH_MARGIN_MS > Date.now()) return session.tokens.accessToken;
+  const fresh = session.tokens.accessTokenExpiresAt - REFRESH_MARGIN_MS > Date.now();
+  if (fresh && !forceRefresh) return session.tokens.accessToken;
 
   refreshing ??= apiRequest<AuthSession>("/api/auth/refresh", { body: { refreshToken: session.tokens.refreshToken } })
     .then(async (next) => {

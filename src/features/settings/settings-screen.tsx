@@ -97,7 +97,7 @@ export function SettingsScreen() {
             className="flex-row items-center justify-center gap-2 rounded-xl px-5 py-2.5 active:bg-highlight-soft"
           >
             <Trash2 size={20} color={colors.redpen} strokeWidth={2.5} />
-            <Text className="font-sans-semibold text-base text-redpen">Hapus akun</Text>
+            <Text className="font-sans-semibold text-base text-redpen">Hapus Akun</Text>
           </Pressable>
         </NoteCard>
       </View>
@@ -108,7 +108,7 @@ export function SettingsScreen() {
         visible={confirming}
         title="Hapus akun?"
         message={`Nama panggilan "${user?.displayName ?? ""}" dan semua data akunmu akan dihapus permanen. Ini tidak bisa dibatalkan.`}
-        confirmLabel="Hapus akun"
+        confirmLabel="Hapus Akun"
         danger
         busy={deleting}
         error={deleteError}

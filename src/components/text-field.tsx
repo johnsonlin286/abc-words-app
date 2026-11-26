@@ -1,17 +1,23 @@
-import { useState } from "react";
+import { useState, type ComponentRef, type Ref } from "react";
 import { Text, TextInput, View, type TextInputProps } from "react-native";
 
 import { colors } from "@/theme/tokens";
+
+/** What a ref on the field gives: `focus()`, `blur()`, ... */
+export type TextFieldHandle = ComponentRef<typeof TextInput>;
 
 type Props = TextInputProps & {
   label: string;
   hint?: string;
   /** Shown in red pen under the field; also marks the field invalid. */
   error?: string | null;
+  /** "code": large spaced capitals for a room code. */
+  variant?: "text" | "code";
+  ref?: Ref<TextFieldHandle>;
 };
 
 /** Labelled text field: white card stock, pen outline, highlighter ring on focus, red when invalid. */
-export function TextField({ label, hint, error, onFocus, onBlur, ...props }: Props) {
+export function TextField({ label, hint, error, variant = "text", onFocus, onBlur, ...props }: Props) {
   const [focused, setFocused] = useState(false);
   return (
     <View className="gap-1.5">
@@ -31,9 +37,9 @@ export function TextField({ label, hint, error, onFocus, onBlur, ...props }: Pro
           accessibilityLabel={label}
           accessibilityHint={hint}
           placeholderTextColor={colors.inkFaint}
-          className={`rounded-xl border-2 bg-white px-3.5 py-2.5 font-sans text-base text-ink ${
-            error ? "border-redpen" : "border-ink"
-          }`}
+          className={`rounded-xl border-2 bg-white px-3.5 py-2.5 text-ink ${
+            variant === "code" ? "font-sans-bold text-xl tracking-[6px]" : "font-sans text-base"
+          } ${error ? "border-redpen" : "border-ink"}`}
           onFocus={(e) => {
             setFocused(true);
             onFocus?.(e);

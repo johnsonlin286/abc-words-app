@@ -95,7 +95,7 @@ export function HowToPlayScreen() {
             ))}
           </View>
           <PrimaryButton
-            label={last ? "Main sekarang" : "Lanjut"}
+            label={last ? "Main Sekarang" : "Lanjut"}
             onPress={() => (last ? router.dismissTo("/") : goTo(index + 1))}
           />
           {last ? (
@@ -105,11 +105,11 @@ export function HowToPlayScreen() {
               className="flex-row items-center justify-center gap-2 rounded-xl border-2 border-ink bg-white px-5 py-2.5 active:bg-highlight-soft"
             >
               <RotateCcw size={18} color={colors.ink} strokeWidth={2.5} />
-              <Text className="font-sans-semibold text-base text-ink">Ulangi dari awal</Text>
+              <Text className="font-sans-semibold text-base text-ink">Ulangi dari Awal</Text>
             </Pressable>
           ) : null}
           <Pressable onPress={() => router.push("/rules")} accessibilityRole="link" hitSlop={8} className="self-center">
-            <Text className="font-sans-semibold text-base text-ink underline">Aturan lengkap</Text>
+            <Text className="font-sans-semibold text-base text-ink underline">Aturan Lengkap</Text>
           </Pressable>
         </View>
       </SafeAreaView>

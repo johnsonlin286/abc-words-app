@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Pressable, Text, View } from "react-native";
 
 import { NoteCard } from "@/components/note-card";
 import { TextField } from "@/components/text-field";
@@ -53,7 +53,7 @@ function NameForm({ onClose }: { onClose: () => void }) {
   return (
     <KeyboardAvoidingView
       className="flex-1 justify-center bg-ink/40 px-6"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior="padding"
     >
       <NoteCard className="gap-4 p-5" accessibilityViewIsModal>
         <View className="gap-1">

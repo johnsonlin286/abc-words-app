@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -43,7 +43,7 @@ export function ChooseNameScreen({ onSubmit, onSignOut, loading = false, error =
   return (
     <Paper>
       <SafeAreaView className="flex-1">
-        <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <KeyboardAvoidingView className="flex-1" behavior="padding">
           <ScrollView
             contentContainerClassName="flex-grow justify-center gap-8 px-8 py-6"
             keyboardShouldPersistTaps="handled"

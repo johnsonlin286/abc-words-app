@@ -16,6 +16,7 @@ import { BackButton } from "@/components/back-button";
 import { NoteCard } from "@/components/note-card";
 import { Paper } from "@/components/paper";
 import { PrimaryButton } from "@/components/primary-button";
+import { useRoomStore } from "@/features/room/room-store";
 import { formatPoints } from "@/shared/game";
 import { colors } from "@/theme/tokens";
 
@@ -82,6 +83,9 @@ function Step({ number, title, body }: { number: number; title: string; body: re
  * The short illustrated version is how-to-play-screen.tsx.
  */
 export function RulesScreen() {
+  // Opened from a room, the button at the end goes back there instead of to the lobby.
+  const inRoom = useRoomStore((s) => s.roomId !== null);
+
   return (
     <Paper>
       <SafeAreaView className="flex-1">
@@ -164,7 +168,10 @@ export function RulesScreen() {
 
           <View className="gap-3 border-t-2 border-dashed border-ink-faint pt-8">
             <Text className="font-sans-bold text-xl text-ink">Sudah paham? Ajak temanmu!</Text>
-            <PrimaryButton label="Main sekarang" onPress={() => router.dismissTo("/")} />
+            <PrimaryButton
+              label={inRoom ? "Kembali ke Room" : "Main Sekarang"}
+              onPress={() => (inRoom ? router.back() : router.dismissTo("/"))}
+            />
           </View>
           </Animated.View>
         </ScrollView>
