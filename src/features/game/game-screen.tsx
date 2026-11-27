@@ -48,7 +48,8 @@ export function GameScreen() {
   // The "waiting for players" note sits at the top of the card, so it is brought into view as well.
   const waiting = !!room && room.state.waitingForPlayersMs !== null;
   const focus = useFocusGameCard(!room || phase === "waiting" ? null : `${room.state.round}:${phase}:${waiting}`);
-  const { scrollRef, onScrollLayout, onScroll, areaRef, onAreaLayout, areaMinHeight, showInArea, keepInView } = focus;
+  const { scrollRef, onScrollLayout, onScroll, areaRef, onAreaLayout, areaMinHeight, showInArea, showAboveKeyboard, keepInView } =
+    focus;
   const answersBelow = useAnswersBelow(
     focus,
     room && phase === "voting" ? String(room.state.round) : null,
@@ -116,7 +117,7 @@ export function GameScreen() {
                             key={room.state.round}
                             room={room}
                             letter={room.state.reveal.letter}
-                            onFormShown={waiting ? stayPut : showInArea}
+                            onFormShown={waiting ? stayPut : showAboveKeyboard}
                           />
                         ) : phase === "voting" && room.state.reveal ? (
                           <VotingPhase

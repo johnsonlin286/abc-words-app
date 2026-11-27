@@ -4,6 +4,8 @@ import { useReducedMotion } from "react-native-reanimated";
 
 /** Paper left visible above (or below) what is brought into view. */
 const MARGIN = 8;
+/** Room kept free under what is brought into view: the chat button floats in the bottom corner. */
+const CHAT_BUTTON_ROOM = 88;
 /** Time for a new phase to be laid out before scrolling to it. */
 const SETTLE_MS = 80;
 
@@ -76,24 +78,31 @@ export function useFocusGameCard(key: string | null) {
     (target: ComponentRef<typeof View> | null) => {
       if (!target || !areaRef.current) return;
       target.measureLayout(areaRef.current, (_x, y, _width, height) => {
-        const needed = areaY.current + y + height + MARGIN - viewport.current;
+        const needed = areaY.current + y + height + CHAT_BUTTON_ROOM - viewport.current;
         if (needed > scrollY.current) scrollRef.current?.scrollTo({ y: needed, animated });
       });
     },
     [animated],
   );
 
-  /** Scrolls past the top of the game area only as far as needed to show `target` (inside it) whole. */
-  const showInArea = useCallback(
-    (target: ComponentRef<typeof View> | null) => {
+  /**
+   * Scrolls past the top of the game area only as far as needed to show `target` (inside it) whole,
+   * leaving `below` free under it.
+   */
+  const scrollToShow = useCallback(
+    (target: ComponentRef<typeof View> | null, below: number) => {
       if (!target || !areaRef.current) return;
       target.measureLayout(areaRef.current, (_x, y, _width, height) => {
-        const needed = areaY.current + y + height + MARGIN - viewport.current;
+        const needed = areaY.current + y + height + below - viewport.current;
         scrollRef.current?.scrollTo({ y: Math.max(areaY.current - MARGIN, needed, 0), animated });
       });
     },
     [animated],
   );
+  /** Shows `target` clear of the chat button. */
+  const showInArea = useCallback((target: ComponentRef<typeof View> | null) => scrollToShow(target, CHAT_BUTTON_ROOM), [scrollToShow]);
+  /** Shows `target` right above the keyboard, which covers the chat button anyway. */
+  const showAboveKeyboard = useCallback((target: ComponentRef<typeof View> | null) => scrollToShow(target, MARGIN), [scrollToShow]);
 
   // During a game the area gets a full screen of room, so even a short one can reach the top.
   const areaMinHeight = key === null ? undefined : viewportHeight;
@@ -106,6 +115,7 @@ export function useFocusGameCard(key: string | null) {
     onAreaLayout,
     areaMinHeight,
     showInArea,
+    showAboveKeyboard,
     keepInView,
     visibleArea,
     onViewChange,
