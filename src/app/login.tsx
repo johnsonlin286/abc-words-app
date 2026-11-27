@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { signInWithIdToken } from "@/features/auth/auth-store";
+import { signInWithIdToken, useAuthStore } from "@/features/auth/auth-store";
 import { getGoogleIdToken, googleSignInErrorMessage } from "@/features/auth/google-sign-in";
 import { LoginScreen } from "@/features/auth/login-screen";
 import { ApiError } from "@/lib/api";
@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api";
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const notice = useAuthStore((s) => s.notice);
 
   async function signIn() {
     setLoading(true);
@@ -28,5 +29,5 @@ export default function Login() {
     }
   }
 
-  return <LoginScreen onGooglePress={signIn} loading={loading} error={error} />;
+  return <LoginScreen onGooglePress={signIn} loading={loading} error={error} notice={notice} />;
 }

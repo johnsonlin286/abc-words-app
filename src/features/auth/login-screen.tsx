@@ -15,6 +15,8 @@ type Props = {
   loading?: boolean;
   /** A failed sign-in, in the teacher's red pen under the button. */
   error?: string | null;
+  /** Why the player was signed out without choosing to; shown above the button. */
+  notice?: string | null;
 };
 
 /**
@@ -26,7 +28,7 @@ type Props = {
  * Animated.* components don't take NativeWind classes, so they only animate; plain views inside
  * carry the styling.
  */
-export function LoginScreen({ onGooglePress, loading = false, error = null }: Props) {
+export function LoginScreen({ onGooglePress, loading = false, error = null, notice = null }: Props) {
   return (
     <Paper>
       <SafeAreaView className="flex-1">
@@ -97,6 +99,14 @@ export function LoginScreen({ onGooglePress, loading = false, error = null }: Pr
                   Cukup pakai akun Google-mu. Tanpa isi formulir, tanpa kata sandi baru.
                 </Text>
               </View>
+              {notice ? (
+                <View
+                  accessibilityLiveRegion="polite"
+                  className="rounded-xl border-2 border-dashed border-ink-soft bg-highlight-soft px-3.5 py-2.5"
+                >
+                  <Text className="font-sans text-sm leading-5 text-ink">{notice}</Text>
+                </View>
+              ) : null}
               <GoogleButton onPress={onGooglePress} loading={loading} />
               {error ? (
                 <Text accessibilityRole="alert" className="font-sans-semibold text-sm text-redpen">

@@ -8,12 +8,17 @@ import { clearSession, loadSession, saveSession } from "./session-storage";
 /** Refresh this long before the access token expires, so a request never races the expiry. */
 const REFRESH_MARGIN_MS = 60_000;
 
+/** Same words as the web, shown on the login screen after the app signed the player out by itself. */
+const SESSION_ENDED = "Sesi berakhir. Silakan masuk lagi.";
+
 type AuthState = {
   status: "loading" | "signedOut" | "signedIn";
   user: AuthUser | null;
+  /** Why the app signed the player out by itself (expired or revoked session, account deleted elsewhere). */
+  notice: string | null;
 };
 
-export const useAuthStore = create<AuthState>()(() => ({ status: "loading", user: null }));
+export const useAuthStore = create<AuthState>()(() => ({ status: "loading", user: null, notice: null }));
 
 // Tokens stay outside React state: nothing renders them, and keeping them here avoids re-renders
 // every 15 minutes when the access token rotates.
@@ -22,21 +27,23 @@ let refreshing: Promise<AuthSession> | null = null;
 
 function setSignedIn(next: AuthSession) {
   session = next;
-  useAuthStore.setState({ status: "signedIn", user: next.user });
+  useAuthStore.setState({ status: "signedIn", user: next.user, notice: null });
 }
 
-async function signOutLocally() {
+/** `notice` says why when the player didn't sign out themself. */
+async function signOutLocally(notice: string | null = null) {
   session = null;
   refreshing = null;
   await clearSession();
-  useAuthStore.setState({ status: "signedOut", user: null });
+  useAuthStore.setState({ status: "signedOut", user: null, notice });
 }
 
 /** Read the saved session at launch (the splash screen stays up until this settles). */
 export async function restoreSession(): Promise<void> {
   const saved = await loadSession();
   if (!saved || saved.tokens.refreshTokenExpiresAt <= Date.now()) {
-    await signOutLocally();
+    // A saved but expired session ended without the player choosing to.
+    await signOutLocally(saved ? SESSION_ENDED : null);
     return;
   }
   setSignedIn(saved);
@@ -67,7 +74,7 @@ export async function getAccessToken({ forceRefresh = false } = {}): Promise<str
       return next;
     })
     .catch(async (error: unknown) => {
-      if (error instanceof ApiError && error.status === 401) await signOutLocally();
+      if (error instanceof ApiError && error.status === 401) await signOutLocally(SESSION_ENDED);
       throw error;
     })
     .finally(() => {

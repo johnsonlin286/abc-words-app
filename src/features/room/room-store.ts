@@ -8,10 +8,14 @@ import {
   NAME_TAKEN,
   ROOM_TYPE,
   UNAUTHORIZED,
+  type ChatMessage,
   type GameSettings,
   type GameState,
   type RejectReason,
 } from "@/shared/game";
+
+/** Chat messages kept on the phone (the server sends its own recent history with the room). */
+const MAX_MESSAGES = 200;
 
 /** Longest wait between two attempts after the server refused the connection. */
 const RETRY_MAX_MS = 15_000;
@@ -45,9 +49,24 @@ type RoomState = {
   requestError: string | null;
   /** The host's last call to this player (waiting room); `at` changes on every call. */
   ping: { from: string; at: number } | null;
+  /** The room's chat, oldest first. */
+  messages: ChatMessage[];
+  /**
+   * Local time until which this player is muted in chat for breaking the chat rules. The server only
+   * says so when a message is sent; it lasts for this app session.
+   */
+  chatMutedUntil: number | null;
 };
 
-const NO_ROOM = { roomId: null, room: null, phaseEndsAt: null, waitingEndsAt: null, ping: null };
+const NO_ROOM = {
+  roomId: null,
+  room: null,
+  phaseEndsAt: null,
+  waitingEndsAt: null,
+  ping: null,
+  messages: [] as ChatMessage[],
+  chatMutedUntil: null,
+};
 const INITIAL: RoomState = {
   connection: "idle",
   ready: false,
@@ -82,9 +101,13 @@ function showRoom(room: GameRoomView) {
     before.state.round === room.state.round &&
     before.state.phase === room.state.phase &&
     before.state.paused === room.state.paused;
+  const sameRoom = before?.id === room.id;
   set({
     roomId: room.id,
     room,
+    messages: room.state.messages.slice(-MAX_MESSAGES),
+    // A mute belongs to the room it was given in.
+    ...(sameRoom ? {} : { chatMutedUntil: null }),
     phaseEndsAt: steadyEnd(phaseEndsAt, room.state.remainingMs, samePhase),
     waitingEndsAt: steadyEnd(waitingEndsAt, room.state.waitingForPlayersMs, before?.id === room.id),
   });
@@ -128,6 +151,7 @@ function bindSocket(): GameSocket {
   s.on("room:event", ({ roomId, event, data }) => {
     if (roomId !== useRoomStore.getState().room?.id) return;
     if (event === "ping") set({ ping: { from: (data as { from: string }).from, at: Date.now() } });
+    if (event === "chat:message") set(({ messages }) => ({ messages: mergeMessage(messages, data as ChatMessage) }));
   });
   s.on("room:kicked", () => set({ ...NO_ROOM, notice: "Kamu dikeluarkan dari room oleh host." }));
   s.on("room:closed", ({ reason }) =>
@@ -234,6 +258,11 @@ export async function leaveRoom(): Promise<void> {
   set({ ...NO_ROOM, requestError: null });
 }
 
+/** Append without duplicates: a message can arrive both in `room:state` and as an event. */
+function mergeMessage(list: ChatMessage[], message: ChatMessage): ChatMessage[] {
+  return list.some((m) => m.id === message.id) ? list : [...list, message].slice(-MAX_MESSAGES);
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Terjadi kesalahan.";
 }
@@ -290,6 +319,23 @@ export async function submitAnswer(text: string): Promise<AnswerOutcome> {
   } catch (error) {
     const details = error instanceof RequestError ? error.details : undefined;
     return { status: "error", message: errorMessage(error), retryAfterMs: retryAfter(details) };
+  }
+}
+
+/**
+ * Sends a chat message; resolves with null when sent, or why not. A mute isn't an error line: it is
+ * kept in `chatMutedUntil`, which the chat shows with a countdown.
+ */
+export async function sendMessage(text: string): Promise<string | null> {
+  try {
+    const message = (await request("room:action", { action: "send", payload: { text } })) as ChatMessage;
+    set(({ messages }) => ({ messages: mergeMessage(messages, message) }));
+    return null;
+  } catch (error) {
+    const mutedMs = retryAfter(error instanceof RequestError ? error.details : undefined);
+    if (!mutedMs) return errorMessage(error);
+    set({ chatMutedUntil: Date.now() + mutedMs });
+    return null;
   }
 }
 
