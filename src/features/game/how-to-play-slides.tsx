@@ -79,9 +79,13 @@ function Answering({ active }: IllustrationProps) {
 
   useEffect(() => {
     if (!active || reduceMotion) return;
+    // The clock reaches its stop after the word is typed; the timer ends there.
+    let left = DEMO_TOTAL_MS;
     const timer = setInterval(() => {
-      setLeft((l) => Math.max(l - 1_000, DEMO_STOP_MS));
+      left = Math.max(left - 1_000, DEMO_STOP_MS);
+      setLeft(left);
       setTyped((t) => Math.min(t + 1, WORD.length));
+      if (left === DEMO_STOP_MS) clearInterval(timer);
     }, 125);
     return () => clearInterval(timer);
   }, [active, reduceMotion]);

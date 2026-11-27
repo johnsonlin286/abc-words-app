@@ -1,5 +1,5 @@
 import { BellRing, Check, Crown, X, type LucideIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -28,6 +28,8 @@ export function PlayerSeats({ members, maxMembers, hostId, myId, ready }: Props)
   const [error, setError] = useState<string | null>(null);
   /** Players called in the last `PING_COOLDOWN_MS`, so their bell greys out (the server enforces it too). */
   const [cooling, setCooling] = useState<string[]>([]);
+  const coolingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => coolingTimers.current.forEach(clearTimeout), []);
 
   const [kicking, setKicking] = useState<MemberView | null>(null);
   const [kickBusy, setKickBusy] = useState(false);
@@ -38,7 +40,9 @@ export function PlayerSeats({ members, maxMembers, hostId, myId, ready }: Props)
     setError(message);
     if (message) return;
     setCooling((ids) => [...ids, member.userId]);
-    setTimeout(() => setCooling((ids) => ids.filter((id) => id !== member.userId)), PING_COOLDOWN_MS);
+    coolingTimers.current.push(
+      setTimeout(() => setCooling((ids) => ids.filter((id) => id !== member.userId)), PING_COOLDOWN_MS),
+    );
   };
 
   const confirmKick = async () => {

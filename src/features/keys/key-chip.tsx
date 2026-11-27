@@ -35,7 +35,8 @@ export function KeyChip() {
           </View>
         ) : null}
       </Pressable>
-      <KeysDialog visible={open} onClose={() => setOpen(false)} />
+      {/* Mounted only while open: it has its own countdown. */}
+      {open ? <KeysDialog visible onClose={() => setOpen(false)} /> : null}
     </>
   );
 }

@@ -29,6 +29,8 @@ type Props = {
 export function ChooseNameScreen({ onSubmit, onSignOut, loading = false, error = null }: Props) {
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  /** The name the server answered about; its error goes away once the player types another. */
+  const [sentName, setSentName] = useState<string | null>(null);
 
   const trimmed = name.trim();
   const validationError = validateUserName(trimmed);
@@ -37,7 +39,9 @@ export function ChooseNameScreen({ onSubmit, onSignOut, loading = false, error =
 
   function submit() {
     setSubmitted(true);
-    if (!validationError) onSubmit(trimmed);
+    if (validationError) return;
+    setSentName(trimmed);
+    onSubmit(trimmed);
   }
 
   return (
@@ -70,7 +74,7 @@ export function ChooseNameScreen({ onSubmit, onSignOut, loading = false, error =
                 <TextField
                   label="Nama panggilan"
                   hint={`${USER_NAME_HINT}.`}
-                  error={showValidation ?? error}
+                  error={showValidation ?? (trimmed === sentName ? error : null)}
                   value={name}
                   onChangeText={setName}
                   placeholder="budi_01"

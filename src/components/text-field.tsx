@@ -11,17 +11,19 @@ type Props = TextInputProps & {
   hint?: string;
   /** Shown in red pen under the field; also marks the field invalid. */
   error?: string | null;
+  /** The label is only spoken, for a field whose surroundings already say what it is. */
+  hideLabel?: boolean;
   /** "code": large spaced capitals for a room code. */
   variant?: "text" | "code";
   ref?: Ref<TextFieldHandle>;
 };
 
 /** Labelled text field: white card stock, pen outline, highlighter ring on focus, red when invalid. */
-export function TextField({ label, hint, error, variant = "text", onFocus, onBlur, ...props }: Props) {
+export function TextField({ label, hideLabel, hint, error, variant = "text", onFocus, onBlur, ...props }: Props) {
   const [focused, setFocused] = useState(false);
   return (
     <View className="gap-1.5">
-      <Text className="font-sans-semibold text-sm text-ink">{label}</Text>
+      {hideLabel ? null : <Text className="font-sans-semibold text-sm text-ink">{label}</Text>}
       {/* Highlighter focus ring as a rounded border on a wrapper (pulled out by its width so the layout
           doesn't move). A style prop on the TextInput itself drops NativeWind's padding, and a spread
           boxShadow draws square corners on some Android surfaces. */}

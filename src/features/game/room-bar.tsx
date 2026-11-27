@@ -4,13 +4,19 @@ import { BookOpen, Copy, LogOut, Share2, type LucideIcon } from "lucide-react-na
 import { useEffect, useState } from "react";
 import { Pressable, Share, Text, View } from "react-native";
 
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { VisibilityBadge } from "@/features/lobby/room-badges";
 import { leaveRoom, type GameRoomView } from "@/features/room/room-store";
 import { colors } from "@/theme/tokens";
 
+import { EndGame } from "./end-game";
+
 /** The room code on the paper, with what to do with it and the way out. */
-export function RoomBar({ room }: { room: GameRoomView }) {
+export function RoomBar({ room, isHost }: { room: GameRoomView; isHost: boolean }) {
   const [copied, setCopied] = useState(false);
+  const [askLeave, setAskLeave] = useState(false);
+  const { phase } = room.state;
+  const playing = phase !== "waiting" && phase !== "finished";
 
   useEffect(() => {
     if (!copied) return;
@@ -45,10 +51,40 @@ export function RoomBar({ room }: { room: GameRoomView }) {
         <Action icon={BookOpen} label="Cara Main" onPress={() => router.push("/rules")} />
         <Action icon={Copy} label={copied ? "Kode Tersalin" : "Salin Kode"} onPress={() => void copy()} />
         <Action icon={Share2} label="Bagikan" onPress={share} />
-        <Action icon={LogOut} label="Keluar Room" onPress={() => void leaveRoom()} danger />
+        {/* A running game can't be rejoined, so leaving it asks first. */}
+        <Action
+          icon={LogOut}
+          label="Keluar Room"
+          onPress={() => (playing ? setAskLeave(true) : void leaveRoom())}
+          danger
+        />
+        {isHost && playing ? (
+          <EndGame room={room}>
+            {(open, icon) => <Action icon={icon} label="Akhiri Permainan" onPress={open} danger />}
+          </EndGame>
+        ) : null}
       </View>
+      <ConfirmDialog
+        visible={askLeave && playing}
+        title="Keluar dari room?"
+        message={leaveMessage(true)}
+        confirmLabel="Keluar Room"
+        danger
+        onConfirm={() => {
+          setAskLeave(false);
+          void leaveRoom();
+        }}
+        onCancel={() => setAskLeave(false)}
+      />
     </View>
   );
+}
+
+/** What leaving means, for the dialogs that ask about it. */
+export function leaveMessage(playing: boolean): string {
+  return playing
+    ? "Permainan sedang berjalan, jadi kamu tidak bisa masuk lagi sampai selesai."
+    : "Kamu bisa bergabung lagi dengan kode room selama permainannya belum dimulai.";
 }
 
 type ActionProps = { icon: LucideIcon; label: string; onPress: () => void; danger?: boolean };

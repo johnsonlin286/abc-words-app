@@ -1,9 +1,17 @@
 import { create } from "zustand";
 
 import { getAccessToken } from "@/features/auth/auth-store";
-import { getGameSocket, request, type GameSocket } from "@/lib/game-socket";
+import { getGameSocket, request, RequestError, type GameSocket } from "@/lib/game-socket";
 import type { RoomView } from "@/shared/contract";
-import { LIMITS, NAME_TAKEN, ROOM_TYPE, UNAUTHORIZED, type GameSettings, type GameState } from "@/shared/game";
+import {
+  LIMITS,
+  NAME_TAKEN,
+  ROOM_TYPE,
+  UNAUTHORIZED,
+  type GameSettings,
+  type GameState,
+  type RejectReason,
+} from "@/shared/game";
 
 /** Longest wait between two attempts after the server refused the connection. */
 const RETRY_MAX_MS = 15_000;
@@ -25,6 +33,8 @@ type RoomState = {
   room: GameRoomView | null;
   /** Local time at which the current game phase ends; null when it has no limit. */
   phaseEndsAt: number | null;
+  /** Local time at which a game waiting for missing players gives up; null while enough are online. */
+  waitingEndsAt: number | null;
   /** Shown in the lobby after being kicked / the room closing. */
   notice: string | null;
   /** Why the server keeps refusing the connection. */
@@ -37,7 +47,7 @@ type RoomState = {
   ping: { from: string; at: number } | null;
 };
 
-const NO_ROOM = { roomId: null, room: null, phaseEndsAt: null, ping: null };
+const NO_ROOM = { roomId: null, room: null, phaseEndsAt: null, waitingEndsAt: null, ping: null };
 const INITIAL: RoomState = {
   connection: "idle",
   ready: false,
@@ -52,11 +62,31 @@ export const useRoomStore = create<RoomState>()(() => INITIAL);
 
 const set = useRoomStore.setState;
 
+/** End times computed from snapshots of the same phase differ only by network delay; below this they are kept. */
+const JITTER_MS = 300;
+
+/**
+ * The end time from this snapshot, or the previous one when it is the same deadline seen again. Every
+ * snapshot (each pick, vote or answer) would otherwise move it a little, restarting every countdown.
+ */
+function steadyEnd(before: number | null, remainingMs: number | null, sameClock: boolean): number | null {
+  if (remainingMs === null) return null;
+  const next = Date.now() + remainingMs;
+  return sameClock && before !== null && Math.abs(next - before) < JITTER_MS ? before : next;
+}
+
 function showRoom(room: GameRoomView) {
+  const { room: before, phaseEndsAt, waitingEndsAt } = useRoomStore.getState();
+  const samePhase =
+    before?.id === room.id &&
+    before.state.round === room.state.round &&
+    before.state.phase === room.state.phase &&
+    before.state.paused === room.state.paused;
   set({
     roomId: room.id,
     room,
-    phaseEndsAt: room.state.remainingMs === null ? null : Date.now() + room.state.remainingMs,
+    phaseEndsAt: steadyEnd(phaseEndsAt, room.state.remainingMs, samePhase),
+    waitingEndsAt: steadyEnd(waitingEndsAt, room.state.waitingForPlayersMs, before?.id === room.id),
   });
 }
 
@@ -221,6 +251,47 @@ async function gameAction(action: string, payload?: unknown): Promise<string | n
 /** Host only. Every start spends a room key, and ending the game doesn't give it back. */
 export const startGame = () => gameAction("start");
 export const endGame = () => gameAction("end");
+
+/** The pick can be changed until everyone has picked; numbers stay secret until the reveal. */
+export const pickNumber = (value: number) => gameAction("pick", { value });
+/** Vote to replace or keep this round's letter; `null` takes the vote back. */
+export const setLetterVote = (choice: "change" | "keep" | null) => gameAction("changeLetter", { choice });
+
+/** Reject someone else's answer with a reason; `null` takes the rejection back. */
+export const setRejection = (answerUserId: string, reason: RejectReason | null) =>
+  gameAction("reject", reason ? { answerUserId, rejected: true, reason } : { answerUserId, rejected: false });
+/** Mark (or unmark) this player as done judging; voting ends once every judge is done. */
+export const setVotingDone = (done: boolean) => gameAction("doneVoting", { done });
+
+export type AnswerOutcome =
+  | { status: "accepted" }
+  | { status: "duplicate" | "near-tie" | "error"; message: string; retryAfterMs?: number };
+
+const ANSWER_MESSAGES = {
+  duplicate: "Kata itu (atau nama lainnya) sudah dijawab pemain lain. Coba kata lain.",
+  "near-tie": "Keduluan! Kata itu (atau nama lainnya) baru saja masuk. Waktumu ditambah, coba kata lain.",
+};
+
+/** The pause length the server attaches to a rejected answer, if any. */
+function retryAfter(source: unknown): number | undefined {
+  const value = (source as { retryAfterMs?: unknown } | null | undefined)?.retryAfterMs;
+  return typeof value === "number" && value > 0 ? value : undefined;
+}
+
+/** One accepted answer per round; a refused one says why, and may start a short pause. */
+export async function submitAnswer(text: string): Promise<AnswerOutcome> {
+  try {
+    const data = (await request("room:action", { action: "answer", payload: { text } })) as {
+      status: "accepted" | "duplicate" | "near-tie";
+      retryAfterMs?: number;
+    };
+    if (data.status === "accepted") return { status: "accepted" };
+    return { status: data.status, message: ANSWER_MESSAGES[data.status], retryAfterMs: retryAfter(data) };
+  } catch (error) {
+    const details = error instanceof RequestError ? error.details : undefined;
+    return { status: "error", message: errorMessage(error), retryAfterMs: retryAfter(details) };
+  }
+}
 
 /** Waiting room: press (or take back) "Siap". */
 export const setReady = (ready: boolean) => gameAction("ready", { ready });

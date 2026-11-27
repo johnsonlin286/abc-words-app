@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { getAccessToken, useAuthStore } from "@/features/auth/auth-store";
 import { apiRequest } from "@/lib/api";
+import { useTimeLeft } from "@/lib/use-time-left";
 import type { RoomKeyStatus } from "@/shared/contract";
 
 type RoomKeys = RoomKeyStatus & {
@@ -25,24 +26,13 @@ export function useRoomKeys() {
   });
 
   const nextAt = query.data?.nextAt ?? null;
-  const left = useMsUntil(nextAt === null || !query.data ? null : nextAt + query.data.skewMs);
+  const left = useTimeLeft(nextAt === null || !query.data ? null : nextAt + query.data.skewMs);
 
   useEffect(() => {
     if (left === 0) void queryClient.invalidateQueries({ queryKey: ["room-keys", userId] });
   }, [left, queryClient, userId]);
 
   return { keys: query.data ?? null, msUntilNext: left, isError: query.isError };
-}
-
-/** Milliseconds until `at` (device clock), ticking once a second; null when there is nothing to count. */
-function useMsUntil(at: number | null): number | null {
-  const [now, setNow] = useState(Date.now);
-  useEffect(() => {
-    if (at === null) return;
-    const timer = setInterval(() => setNow(Date.now()), 1_000);
-    return () => clearInterval(timer);
-  }, [at]);
-  return at === null ? null : Math.max(at - now, 0);
 }
 
 /** "12:34", or "1:02:03" from an hour up. */
