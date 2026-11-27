@@ -14,7 +14,7 @@ import type { GameState } from "@/shared/game";
 import { AfkNotice, isAfk } from "./afk";
 import { AlphabetStrip } from "./alphabet-strip";
 import { AnsweringPhase } from "./answering-phase";
-import { FinishedPlaceholder } from "./finished-placeholder";
+import { FinishedPhase } from "./finished-phase";
 import { PickingPhase } from "./picking-phase";
 import { PingAlert } from "./ping-alert";
 import { ResultPhase } from "./result-phase";
@@ -129,7 +129,7 @@ export function GameScreen() {
                         ) : phase === "result" && room.state.reveal ? (
                           <ResultPhase key={room.state.round} room={room} letter={room.state.reveal.letter} />
                         ) : (
-                          <FinishedPlaceholder room={room} isHost={room.hostId === myId} />
+                          <FinishedPhase key={room.state.round} room={room} isHost={room.hostId === myId} />
                         )}
                       </View>
                     </NoteCard>

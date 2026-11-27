@@ -16,7 +16,7 @@ export function AnswerPills({ room }: { room: GameRoomView }) {
   return (
     <View accessibilityLiveRegion="polite" className="flex-row flex-wrap items-center gap-2">
       <Text accessibilityRole="header" className="font-sans-bold text-sm text-ink">
-        Masuk:
+        Sudah dipakai:
       </Text>
       {answers.map((a) => (
         <Animated.View key={a.userId} entering={FadeInDown.duration(300)}>

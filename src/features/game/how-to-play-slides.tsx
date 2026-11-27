@@ -20,6 +20,7 @@ import { colors } from "@/theme/tokens";
 
 import { FingerSum } from "./finger-sum";
 import { HAND_RATIOS, HANDS } from "./hands";
+import { TROPHIES, type TrophyKind } from "./trophies";
 
 /**
  * Every illustration gets `active`: it is only drawn on the card in view, and mounting it plays
@@ -29,11 +30,6 @@ import { HAND_RATIOS, HANDS } from "./hands";
  */
 type IllustrationProps = { active: boolean };
 
-const TROPHIES = {
-  gold: { source: require("@/assets/trophies/gold.webp"), ratio: 168 / 192 },
-  silver: { source: require("@/assets/trophies/silver.webp"), ratio: 151 / 181 },
-  bronze: { source: require("@/assets/trophies/bronze.webp"), ratio: 134 / 162 },
-} as const;
 
 function Hand({ value, height, rotate, delay }: { value: number; height: number; rotate: string; delay: number }) {
   return (
@@ -209,11 +205,11 @@ function Points({ active }: IllustrationProps) {
   );
 }
 
-function Trophy({ kind, height, name, delay }: { kind: keyof typeof TROPHIES; height: number; name: string; delay: number }) {
+function Trophy({ kind, height, name, delay }: { kind: TrophyKind; height: number; name: string; delay: number }) {
   const trophy = TROPHIES[kind];
   return (
     <Animated.View entering={ZoomIn.delay(delay).springify()} className="items-center gap-1">
-      <Image source={trophy.source} style={{ height, width: height * trophy.ratio }} contentFit="contain" />
+      <Image source={trophy.source} style={{ height, width: (height * trophy.width) / trophy.height }} contentFit="contain" />
       <Text className="font-sans-semibold text-sm text-ink-soft">{name}</Text>
     </Animated.View>
   );
