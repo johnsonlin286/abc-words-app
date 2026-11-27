@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ComponentRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ComponentRef } from "react";
 import { Keyboard, Text, View } from "react-native";
 
 import { PrimaryButton } from "@/components/primary-button";
@@ -45,7 +45,15 @@ export function AnswerForm({ letter, paused, onShow }: Props) {
   }, [paused]);
 
   // When the phase ends the field goes away; take the keyboard with it, or it covers the next screen.
-  useEffect(() => () => Keyboard.dismiss(), []);
+  // A layout effect, so the field is still there to blur: once it is gone, Keyboard.dismiss() alone
+  // no longer knows which field had the keyboard, and the keyboard stays up.
+  useLayoutEffect(() => {
+    const field = input.current;
+    return () => {
+      field?.blur();
+      Keyboard.dismiss();
+    };
+  }, []);
 
   // At the start, and again once the keyboard has opened and the screen got shorter.
   const show = useCallback(() => setTimeout(() => onShow(row.current), SETTLE_MS), [onShow]);

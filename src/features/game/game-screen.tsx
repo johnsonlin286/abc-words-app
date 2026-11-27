@@ -21,6 +21,7 @@ import { ResultPhase } from "./result-phase";
 import { RevealPhase } from "./reveal-phase";
 import { leaveMessage, RoomBar } from "./room-bar";
 import { ScoreStrip } from "./score-strip";
+import { useAnswersBelow } from "./use-answers-below";
 import { useFocusGameCard } from "./use-focus-game-card";
 import { VotingFooter } from "./voting-footer";
 import { VotingPhase } from "./voting-phase";
@@ -45,8 +46,13 @@ export function GameScreen() {
   const playing = !!phase && phase !== "waiting" && phase !== "finished";
   // The "waiting for players" note sits at the top of the card, so it is brought into view as well.
   const waiting = !!room && room.state.waitingForPlayersMs !== null;
-  const { scrollRef, onScrollLayout, onScroll, areaRef, onAreaLayout, areaMinHeight, showInArea, keepInView } =
-    useFocusGameCard(!room || phase === "waiting" ? null : `${room.state.round}:${phase}:${waiting}`);
+  const focus = useFocusGameCard(!room || phase === "waiting" ? null : `${room.state.round}:${phase}:${waiting}`);
+  const { scrollRef, onScrollLayout, onScroll, areaRef, onAreaLayout, areaMinHeight, showInArea, keepInView } = focus;
+  const answersBelow = useAnswersBelow(
+    focus,
+    room && phase === "voting" ? String(room.state.round) : null,
+    room?.state.answers.length ?? 0,
+  );
 
   // The Android back button would leave the app; ask about leaving the room instead.
   useFocusEffect(
@@ -116,6 +122,9 @@ export function GameScreen() {
                             room={room}
                             letter={room.state.reveal.letter}
                             onReasonsShown={waiting ? stayPut : keepInView}
+                            listRef={answersBelow.listRef}
+                            onListLayout={answersBelow.onListLayout}
+                            onRowLayout={answersBelow.onRowLayout}
                           />
                         ) : phase === "result" && room.state.reveal ? (
                           <ResultPhase key={room.state.round} room={room} letter={room.state.reveal.letter} />
@@ -129,7 +138,13 @@ export function GameScreen() {
               )}
             </ScrollView>
             {room && myId && phase === "voting" ? (
-              <VotingFooter key={room.state.round} room={room} myId={myId} />
+              <VotingFooter
+                key={room.state.round}
+                room={room}
+                myId={myId}
+                below={answersBelow.below}
+                onShowMore={answersBelow.showMore}
+              />
             ) : null}
           </KeyboardAvoidingView>
           {/* Only the waiting room has calls; elsewhere it would hold a sound player for nothing. */}

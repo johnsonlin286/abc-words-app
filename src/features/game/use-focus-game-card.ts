@@ -22,6 +22,9 @@ export function useFocusGameCard(key: string | null) {
   // Also kept in a ref, so the scroll helpers stay the same functions when the keyboard resizes the
   // screen; otherwise every user of them would run (and scroll) again.
   const viewport = useRef(0);
+  /** Called whenever what is on screen changes (scroll or screen height). */
+  const viewListeners = useRef(new Set<() => void>());
+  const notifyView = useCallback(() => viewListeners.current.forEach((listener) => listener()), []);
   const reduceMotion = useReducedMotion();
   const animated = !reduceMotion;
   // During a game a change of height (the keyboard closing) brings the area back too: while the page
@@ -39,14 +42,34 @@ export function useFocusGameCard(key: string | null) {
   const onScrollLayout = useCallback((e: LayoutChangeEvent) => {
     viewport.current = e.nativeEvent.layout.height;
     setViewportHeight(e.nativeEvent.layout.height);
-  }, []);
+    notifyView();
+  }, [notifyView]);
   const onAreaLayout = useCallback((e: LayoutChangeEvent) => {
     areaY.current = e.nativeEvent.layout.y;
   }, []);
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = e.nativeEvent.contentOffset.y;
+    notifyView();
+  }, [notifyView]);
+
+  /** The part of the game area on screen, in the area's own coordinates. */
+  const visibleArea = useCallback(
+    () => ({ top: scrollY.current - areaY.current, bottom: scrollY.current - areaY.current + viewport.current }),
+    [],
+  );
+  /** Calls `listener` whenever the visible part changes; returns the unsubscribe function. */
+  const onViewChange = useCallback((listener: () => void) => {
+    viewListeners.current.add(listener);
+    return () => {
+      viewListeners.current.delete(listener);
+    };
   }, []);
+  /** Scrolls so `y` (in the area's coordinates) is at the top of the screen. */
+  const scrollAreaTo = useCallback(
+    (y: number) => scrollRef.current?.scrollTo({ y: Math.max(areaY.current + y, 0), animated }),
+    [animated],
+  );
 
   /** For something that opens under a tap: scrolls down only when the bottom of `target` is cut off. */
   const keepInView = useCallback(
@@ -75,5 +98,17 @@ export function useFocusGameCard(key: string | null) {
   // During a game the area gets a full screen of room, so even a short one can reach the top.
   const areaMinHeight = key === null ? undefined : viewportHeight;
 
-  return { scrollRef, onScrollLayout, onScroll, areaRef, onAreaLayout, areaMinHeight, showInArea, keepInView };
+  return {
+    scrollRef,
+    onScrollLayout,
+    onScroll,
+    areaRef,
+    onAreaLayout,
+    areaMinHeight,
+    showInArea,
+    keepInView,
+    visibleArea,
+    onViewChange,
+    scrollAreaTo,
+  };
 }

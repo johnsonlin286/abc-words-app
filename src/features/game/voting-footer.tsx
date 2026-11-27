@@ -1,31 +1,45 @@
+import { ArrowDown } from "lucide-react-native";
 import { useState } from "react";
 import { Text, View } from "react-native";
 
 import { PrimaryButton } from "@/components/primary-button";
 import { SecondaryButton } from "@/components/secondary-button";
 import { setVotingDone, type GameRoomView } from "@/features/room/room-store";
+import { colors } from "@/theme/tokens";
 
 import { isAfk } from "./afk";
 
-/** Same rule as the server: online, not AFK, with someone else's unverified answer to judge. */
-function votingJudges({ members, state }: GameRoomView) {
-  return members.filter(
-    (m) =>
-      m.isConnected &&
-      !isAfk(state, m.userId) &&
-      state.answers.some((a) => a.userId !== m.userId && !a.verified),
-  );
+/** Same rule as the server: online, with someone else's unverified answer to judge. */
+function canJudge({ members, state }: GameRoomView, userId: string): boolean {
+  const member = members.find((m) => m.userId === userId);
+  return !!member?.isConnected && state.answers.some((a) => a.userId !== userId && !a.verified);
 }
+
+/** The judges voting waits for (server `judgesOf`): AFK players may judge, but aren't waited for. */
+function awaitedJudges(room: GameRoomView) {
+  return room.members.filter((m) => !isAfk(room.state, m.userId) && canJudge(room, m.userId));
+}
+
+type Props = {
+  room: GameRoomView;
+  myId: string;
+  /** Answers this player hasn't had on screen yet this round. */
+  below: number;
+  /** Scrolls on to the answers still below the screen. */
+  onShowMore: () => void;
+};
 
 /**
  * Stays at the bottom of the screen while voting: how many are done, and the button that says this
- * player is. Its height doesn't change, so the list above never jumps.
+ * player is. Until every answer has been on screen it reads "Lihat N Lagi" and scrolls
+ * instead, so nobody finishes judging without seeing them all (owner, 2026-11-27). Its height
+ * doesn't change, so the list above never jumps.
  */
-export function VotingFooter({ room, myId }: { room: GameRoomView; myId: string }) {
+export function VotingFooter({ room, myId, below, onShowMore }: Props) {
   const [error, setError] = useState<string | null>(null);
   const { votingDone, paused } = room.state;
-  const judges = votingJudges(room);
-  const isJudge = judges.some((m) => m.userId === myId);
+  const judges = awaitedJudges(room);
+  const isJudge = canJudge(room, myId);
   const iAmDone = votingDone.includes(myId);
   const doneCount = judges.filter((m) => votingDone.includes(m.userId)).length;
 
@@ -41,9 +55,16 @@ export function VotingFooter({ room, myId }: { room: GameRoomView; myId: string 
         {paused
           ? "Permainan dijeda."
           : (error ??
-            (isJudge ? `${doneCount} dari ${judges.length} selesai menilai.` : "Menunggu pemain lain menilai jawabanmu."))}
+            (isJudge ? `${doneCount}/${judges.length} selesai` : "Menunggu pemain lain menilai jawabanmu."))}
       </Text>
-      {!isJudge ? null : iAmDone ? (
+      {!isJudge ? null : !iAmDone && below > 0 ? (
+        <PrimaryButton
+          label={`Lihat ${below} Lagi`}
+          accessibilityLabel={`Lihat ${below} jawaban lagi di bawah`}
+          accessory={<ArrowDown size={20} color={colors.ink} strokeWidth={2.75} />}
+          onPress={onShowMore}
+        />
+      ) : iAmDone ? (
         <SecondaryButton label="Belum Selesai" onPress={() => void toggle()} disabled={paused} />
       ) : (
         <PrimaryButton label="Selesai Menilai" onPress={() => void toggle()} disabled={paused} />

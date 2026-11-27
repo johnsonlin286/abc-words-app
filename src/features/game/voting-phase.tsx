@@ -1,6 +1,6 @@
 import { Info } from "lucide-react-native";
-import { useRef, useState, type ComponentRef } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useRef, useState, type ComponentRef, type RefObject } from "react";
+import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
 
 import { VerifiedBadge } from "@/components/verified-badge";
 import { useAuthStore } from "@/features/auth/auth-store";
@@ -22,6 +22,10 @@ type Props = {
   letter: string;
   /** Called when reasons open under an answer, so they can be brought into view. */
   onReasonsShown: (row: RowRef) => void;
+  /** Where the list and each answer are, so the footer knows which answers are still below the screen. */
+  listRef: RefObject<ComponentRef<typeof View> | null>;
+  onListLayout: (round: string) => void;
+  onRowLayout: (round: string, answerUserId: string, e: LayoutChangeEvent) => void;
 };
 
 /** The rules of judging, behind the info button so the answers get the room. */
@@ -42,7 +46,7 @@ function buttonLabel(label: string): string {
  * All answers in one compact list: reject with a reason under the answer, votes public. The button
  * that ends this player's judging is in `VotingFooter`, which stays on screen.
  */
-export function VotingPhase({ room, letter, onReasonsShown }: Props) {
+export function VotingPhase({ room, letter, onReasonsShown, listRef, onListLayout, onRowLayout }: Props) {
   const myId = useAuthStore((s) => s.user?.id);
   const endsAt = useRoomStore((s) => s.phaseEndsAt);
   /** Answer whose reasons are open before a rejection is sent. */
@@ -87,7 +91,7 @@ export function VotingPhase({ room, letter, onReasonsShown }: Props) {
         </View>
       ) : null}
 
-      <View className="gap-2">
+      <View ref={listRef} collapsable={false} onLayout={() => onListLayout(String(room.state.round))} className="gap-2">
         {answers.map((a) => (
           <AnswerRow
             key={a.userId}
@@ -97,6 +101,7 @@ export function VotingPhase({ room, letter, onReasonsShown }: Props) {
             noRejectionsLeft={rejectionsLeft === 0}
             onChoose={(open) => setChoosingFor(open ? a.userId : null)}
             onReasonsShown={onReasonsShown}
+            onLayout={(e) => onRowLayout(String(room.state.round), a.userId, e)}
           />
         ))}
       </View>
@@ -111,9 +116,10 @@ type RowProps = {
   noRejectionsLeft: boolean;
   onChoose: (open: boolean) => void;
   onReasonsShown: (row: RowRef) => void;
+  onLayout: (e: LayoutChangeEvent) => void;
 };
 
-function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReasonsShown }: RowProps) {
+function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReasonsShown, onLayout }: RowProps) {
   const rowRef = useRef<ComponentRef<typeof View>>(null);
   const [error, setError] = useState<string | null>(null);
   const isMine = answer.userId === myId;
@@ -129,6 +135,7 @@ function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReaso
     <View
       ref={rowRef}
       collapsable={false}
+      onLayout={onLayout}
       className={`gap-1.5 rounded-xl border-2 bg-white px-3 py-2 ${
         answer.rejectedBy.length > 0 ? "border-redpen" : "border-ink/20"
       }`}
