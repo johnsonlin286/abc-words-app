@@ -28,6 +28,7 @@ export default function AppLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="how-to-play" />
+        <Stack.Screen name="shop" />
       </Stack.Protected>
       <Stack.Protected guard={inRoom}>
         <Stack.Screen name="room" />

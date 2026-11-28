@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Settings } from "lucide-react-native";
+import { Settings, Store } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -68,16 +68,28 @@ export function LobbyScreen() {
     <View className="gap-6 pb-1">
       <View className="flex-row items-center justify-between">
         <KeyChip />
-        <Link href="/settings" asChild>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Pengaturan"
-            hitSlop={8}
-            className="h-11 w-11 items-center justify-center rounded-xl border-2 border-ink bg-white active:bg-highlight-soft"
-          >
-            <Settings size={22} color={colors.ink} strokeWidth={2.5} />
-          </Pressable>
-        </Link>
+        <View className="flex-row gap-2">
+          <Link href="/shop" asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Toko"
+              hitSlop={4}
+              className="h-11 w-11 items-center justify-center rounded-xl border-2 border-ink bg-white active:bg-highlight-soft"
+            >
+              <Store size={22} color={colors.ink} strokeWidth={2.5} />
+            </Pressable>
+          </Link>
+          <Link href="/settings" asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Pengaturan"
+              hitSlop={4}
+              className="h-11 w-11 items-center justify-center rounded-xl border-2 border-ink bg-white active:bg-highlight-soft"
+            >
+              <Settings size={22} color={colors.ink} strokeWidth={2.5} />
+            </Pressable>
+          </Link>
+        </View>
       </View>
 
       <NoteCard className="gap-4 p-4" onLayout={form.onCardLayout}>

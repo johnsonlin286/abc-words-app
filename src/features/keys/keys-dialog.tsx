@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Modal, Text, View } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 
@@ -61,13 +62,25 @@ export function KeysDialog({ visible, onClose }: { visible: boolean; onClose: ()
             </Text>
           </View>
 
-          <Pressable
-            onPress={onClose}
-            accessibilityRole="button"
-            className="items-center rounded-xl border-2 border-ink bg-white px-5 py-2.5 active:bg-highlight-soft"
-          >
-            <Text className="font-sans-semibold text-base text-ink">Oke</Text>
-          </Pressable>
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              className="flex-1 items-center rounded-xl border-2 border-ink bg-white px-5 py-2.5 active:bg-highlight-soft"
+            >
+              <Text className="font-sans-semibold text-base text-ink">Oke</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                onClose();
+                router.push("/shop");
+              }}
+              accessibilityRole="button"
+              className="flex-1 items-center rounded-xl border-2 border-ink bg-highlight px-5 py-2.5 active:opacity-80"
+            >
+              <Text className="font-sans-semibold text-base text-ink">Beli Kunci</Text>
+            </Pressable>
+          </View>
         </NoteCard>
       </View>
     </Modal>
