@@ -2,7 +2,7 @@ import Constants from "expo-constants";
 import { router } from "expo-router";
 import { LogOut, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { NoteCard } from "@/components/note-card";
@@ -10,19 +10,21 @@ import { SettingsRow } from "@/components/settings-row";
 import { SubScreen } from "@/components/sub-screen";
 import { deleteAccount, signOut, useAuthStore } from "@/features/auth/auth-store";
 import { signOutOfGoogle } from "@/features/auth/google-sign-in";
+import { SoundSwitches } from "@/features/preferences/sound-switches";
 import { ApiError } from "@/lib/api";
 import { colors } from "@/theme/tokens";
 
 import { monthYear } from "./format";
 import { NameDialog } from "./name-dialog";
+import { Pressable } from "@/components/pressable";
 
 function SectionTitle({ children }: { children: string }) {
   return <Text className="font-sans-bold text-xl text-ink">{children}</Text>;
 }
 
 /**
- * Pengaturan: who you are (nickname, email only you see, member since), about the app, and the
- * account actions. Avatar and sound/vibration preferences come with their own features.
+ * Pengaturan: who you are (nickname, email only you see, member since), about the app,
+ * music, sound effects and vibration on this phone, and the account actions. The avatar comes with its own feature.
  */
 export function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
@@ -63,6 +65,13 @@ export function SettingsScreen() {
           {/* The email is only ever shown to its owner (Google user data policy). */}
           <SettingsRow label="Email" value={user?.email ?? "-"} />
           <SettingsRow label="Main sejak" value={user ? monthYear(user.createdAt) : "-"} last />
+        </NoteCard>
+      </View>
+
+      <View className="gap-2">
+        <SectionTitle>Suara & getar</SectionTitle>
+        <NoteCard className="px-4 py-1">
+          <SoundSwitches />
         </NoteCard>
       </View>
 

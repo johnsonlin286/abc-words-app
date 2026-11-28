@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { PrimaryButton } from "@/components/primary-button";
 import { TextField } from "@/components/text-field";
@@ -9,6 +9,7 @@ import { OutOfKeysNote } from "@/features/keys/out-of-keys-note";
 import { useRoomKeys } from "@/features/keys/use-room-keys";
 import { createRoom, useRoomStore } from "@/features/room/room-store";
 import { LIMITS } from "@/shared/game";
+import { Pressable } from "@/components/pressable";
 
 const VISIBILITY = [
   { isPrivate: false, label: "Publik", hint: "Muncul di daftar, siapa saja bisa gabung" },

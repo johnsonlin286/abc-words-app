@@ -1,4 +1,4 @@
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 
 import { NoteCard } from "@/components/note-card";
@@ -6,6 +6,7 @@ import { ROOM_KEYS } from "@/shared/game";
 
 import { KeyIcon } from "./key-icon";
 import { formatCountdown, useRoomKeys } from "./use-room-keys";
+import { Pressable } from "@/components/pressable";
 
 /** What a key is for, how many you have and when the next one comes. */
 export function KeysDialog({ visible, onClose }: { visible: boolean; onClose: () => void }) {

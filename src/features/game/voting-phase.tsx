@@ -1,9 +1,10 @@
 import { Info } from "lucide-react-native";
 import { useRef, useState, type ComponentRef, type RefObject } from "react";
-import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
+import { Text, View, type LayoutChangeEvent } from "react-native";
 
 import { VerifiedBadge } from "@/components/verified-badge";
 import { useAuthStore } from "@/features/auth/auth-store";
+import { playSound } from "@/lib/sounds";
 import { setRejection, useRoomStore, type GameRoomView } from "@/features/room/room-store";
 import { formatPoints, LONE_REJECTION_WARNINGS, POINTS, REJECT_REASONS, type RejectReason } from "@/shared/game";
 import { colors } from "@/theme/tokens";
@@ -13,6 +14,7 @@ import { InfoBadge } from "./info-badge";
 import { RejectedBy } from "./rejected-by";
 import { RoundHeader } from "./round-header";
 import { WarningIcon, warningText } from "./warning-badge";
+import { Pressable } from "@/components/pressable";
 
 type Answer = GameRoomView["state"]["answers"][number];
 type RowRef = ComponentRef<typeof View> | null;
@@ -127,6 +129,8 @@ function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReaso
   const showReasons = !isMine && !answer.verified && (mine !== undefined || choosing);
 
   const send = async (reason: RejectReason | null) => {
+    // The red-pen scribble when rejecting; taking it back is quiet.
+    if (reason) playSound("reject");
     onChoose(false);
     setError(await setRejection(answer.userId, reason));
   };
@@ -172,6 +176,8 @@ function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReaso
               return (
                 <Pressable
                   key={r.id}
+                  // Rejecting plays the red-pen scribble instead.
+                  sound={null}
                   onPress={() => {
                     if (!selected) void send(r.id);
                   }}

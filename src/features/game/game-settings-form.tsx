@@ -1,10 +1,11 @@
 import Slider from "@react-native-community/slider";
 import { Minus, Plus, type LucideIcon } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { TextField } from "@/components/text-field";
 import { updateSettings } from "@/features/room/room-store";
+import { playSound } from "@/lib/sounds";
 import {
   ANSWER_SECONDS_OPTIONS,
   CATEGORIES,
@@ -14,6 +15,7 @@ import {
   type GameSettings,
 } from "@/shared/game";
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 /** How long after the last keystroke the custom category is saved. */
 const TYPING_PAUSE_MS = 600;
@@ -105,7 +107,12 @@ function AnswerTime({ value, onChange }: { value: number; onChange: (seconds: nu
         minimumValue={0}
         maximumValue={options.length - 1}
         step={1}
-        onValueChange={(next) => setDragged(Math.round(next))}
+        onValueChange={(next) => {
+          const step = Math.round(next);
+          // A tap for every step the thumb moves onto, like pressing a button.
+          if (step !== (dragged ?? index)) playSound("tap");
+          setDragged(step);
+        }}
         onSlidingComplete={(next) => {
           setDragged(null);
           const seconds = options[Math.round(next)]!;

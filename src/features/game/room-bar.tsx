@@ -1,20 +1,25 @@
 import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
-import { BookOpen, Copy, LogOut, Share2, type LucideIcon } from "lucide-react-native";
+import { BookOpen, Copy, LogOut, Share2, Volume2, VolumeX, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, Share, Text, View } from "react-native";
+import { Share, Text, View } from "react-native";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { VisibilityBadge } from "@/features/lobby/room-badges";
+import { usePreferences } from "@/features/preferences/preferences-store";
+import { SoundDialog } from "@/features/preferences/sound-dialog";
 import { leaveRoom, type GameRoomView } from "@/features/room/room-store";
 import { colors } from "@/theme/tokens";
 
 import { EndGame } from "./end-game";
+import { Pressable } from "@/components/pressable";
 
 /** The room code on the paper, with what to do with it and the way out. */
 export function RoomBar({ room, isHost }: { room: GameRoomView; isHost: boolean }) {
   const [copied, setCopied] = useState(false);
   const [askLeave, setAskLeave] = useState(false);
+  const [soundOpen, setSoundOpen] = useState(false);
+  const silent = usePreferences((s) => !s.music && !s.sound);
   const { phase } = room.state;
   const playing = phase !== "waiting" && phase !== "finished";
 
@@ -51,6 +56,7 @@ export function RoomBar({ room, isHost }: { room: GameRoomView; isHost: boolean 
         <Action icon={BookOpen} label="Cara Main" onPress={() => router.push("/rules")} />
         <Action icon={Copy} label={copied ? "Kode Tersalin" : "Salin Kode"} onPress={() => void copy()} />
         <Action icon={Share2} label="Bagikan" onPress={share} />
+        <Action icon={silent ? VolumeX : Volume2} label="Suara" onPress={() => setSoundOpen(true)} />
         {/* A running game can't be rejoined, so leaving it asks first. */}
         <Action
           icon={LogOut}
@@ -64,6 +70,7 @@ export function RoomBar({ room, isHost }: { room: GameRoomView; isHost: boolean 
           </EndGame>
         ) : null}
       </View>
+      <SoundDialog visible={soundOpen} onClose={() => setSoundOpen(false)} />
       <ConfirmDialog
         visible={askLeave && playing}
         title="Keluar dari room?"

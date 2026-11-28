@@ -1,8 +1,9 @@
 import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
-import { Pressable, Text } from "react-native";
+import { Text } from "react-native";
 
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 /** "Kembali" like the web: a quiet ghost button; goes home when there is nothing to go back to. */
 export function BackButton() {

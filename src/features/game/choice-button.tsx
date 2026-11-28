@@ -1,13 +1,17 @@
 import { Check } from "lucide-react-native";
 import type { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
+import type { SoundName } from "@/lib/sounds";
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   children: ReactNode;
   selected: boolean;
   onPress: () => void;
+  /** Played on press. */
+  sound?: SoundName;
   accessibilityLabel: string;
   disabled?: boolean;
   /** Layout of the button's face. */
@@ -18,10 +22,11 @@ type Props = {
  * A yellow button for choosing one option during a game (number picker, letter vote). The chosen one
  * stays pressed into its shadow and gets a tick, so it reads as chosen without relying on colour.
  */
-export function ChoiceButton({ children, selected, onPress, accessibilityLabel, disabled = false, className = "" }: Props) {
+export function ChoiceButton({ children, selected, onPress, accessibilityLabel, disabled = false, className = "", sound = "tap" }: Props) {
   return (
     <Pressable
       onPress={onPress}
+      sound={sound}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}

@@ -1,12 +1,13 @@
 import { BellRing, Check, Crown, X, type LucideIcon } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { kickPlayer, pingPlayer } from "@/features/room/room-store";
 import type { MemberView } from "@/shared/contract";
 import { PING_COOLDOWN_MS } from "@/shared/game";
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   members: MemberView[];

@@ -94,6 +94,7 @@ export function PickingPhase({ room }: { room: GameRoomView }) {
               {row.map((n) => (
                 <Wiggle key={n} play={nudge} delay={300 + (n - 1) * 40}>
                   <ChoiceButton
+                    sound="pick"
                     selected={myPick === n}
                     onPress={() => void pick(n)}
                     accessibilityLabel={`Pilih angka ${n}`}

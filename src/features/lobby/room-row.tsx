@@ -1,8 +1,9 @@
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import type { LobbyRoom } from "@/shared/contract";
 
 import { getRoomStatus, RoomStatusLabel, VisibilityBadge } from "./room-badges";
+import { Pressable } from "@/components/pressable";
 
 /** One open room in the lobby list; rooms that are full, playing or waiting for a key can't be picked. */
 export function RoomRow({ room, onSelect }: { room: LobbyRoom; onSelect: (room: LobbyRoom) => void }) {

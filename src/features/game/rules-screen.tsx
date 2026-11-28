@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { ChevronDown } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -22,6 +22,7 @@ import { colors } from "@/theme/tokens";
 
 import { FingerSum } from "./finger-sum";
 import { CHAT_RULES, SCORE_NOTE, SCORE_ROWS, STEPS } from "./rules-content";
+import { Pressable } from "@/components/pressable";
 
 function Bullets({ items }: { items: readonly string[] }) {
   return (

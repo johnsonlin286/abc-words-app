@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { PrimaryButton } from "@/components/primary-button";
 import { TextField, type TextFieldHandle } from "@/components/text-field";
@@ -8,6 +8,7 @@ import { LIMITS } from "@/shared/game";
 
 import { getRoomStatus, RoomStatusLabel, VisibilityBadge } from "./room-badges";
 import { useRoomPreview } from "./use-rooms";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   code: string;

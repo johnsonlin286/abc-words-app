@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
+import { playSound } from "@/lib/sounds";
 import { useSecondsLeft } from "@/lib/use-time-left";
 import { colors } from "@/theme/tokens";
 
@@ -19,6 +20,11 @@ export function Countdown({ endsAt, totalMs, urgent: forced = false }: { endsAt:
   const seconds = useSecondsLeft(endsAt) ?? 0;
   const urgent = forced || seconds <= URGENT_SECONDS;
   const progress = useSharedValue(1);
+
+  // A tick for each of the last seconds, with the red bar.
+  useEffect(() => {
+    if (seconds >= 1 && seconds <= URGENT_SECONDS) playSound("tick");
+  }, [seconds]);
 
   useEffect(() => {
     // Capped: on a busy phone a newer end time can arrive before the phase starts, showing more than the phase.

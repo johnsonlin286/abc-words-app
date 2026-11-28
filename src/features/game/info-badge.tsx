@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { Modal, Pressable, Text } from "react-native";
+import { Modal, Text } from "react-native";
 
 import { NoteCard } from "@/components/note-card";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   /** Accessible name of the button, e.g. "Peringatan Andi: 2/3". */

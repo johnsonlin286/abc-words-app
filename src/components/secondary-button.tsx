@@ -1,18 +1,24 @@
 import type { ReactNode } from "react";
-import { Pressable, Text } from "react-native";
+import { Text } from "react-native";
+
+import type { SoundName } from "@/lib/sounds";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   label: string;
   onPress: () => void;
+  /** Played on press ("tap"); null for a button whose action has its own sound. */
+  sound?: SoundName | null;
   disabled?: boolean;
   icon?: ReactNode;
 };
 
 /** A secondary action: plain card stock with a pen outline (web `buttonSecondary`). */
-export function SecondaryButton({ label, onPress, disabled = false, icon }: Props) {
+export function SecondaryButton({ label, onPress, disabled = false, icon, sound = "tap" }: Props) {
   return (
     <Pressable
       onPress={onPress}
+      sound={sound}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled }}

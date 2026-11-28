@@ -24,6 +24,7 @@ import { leaveMessage, RoomBar } from "./room-bar";
 import { ScoreStrip } from "./score-strip";
 import { useAnswersBelow } from "./use-answers-below";
 import { useFocusGameCard } from "./use-focus-game-card";
+import { useGameSounds } from "./use-game-sounds";
 import { VotingFooter } from "./voting-footer";
 import { VotingPhase } from "./voting-phase";
 import { WaitingForPlayers } from "./waiting-for-players";
@@ -43,6 +44,7 @@ export function GameScreen() {
   const room = useRoomStore((s) => s.room);
   const myId = useAuthStore((s) => s.user?.id);
   const [askLeave, setAskLeave] = useState(false);
+  useGameSounds(room, myId);
   const phase = room?.state.phase;
   const playing = !!phase && phase !== "waiting" && phase !== "finished";
   // The "waiting for players" note sits at the top of the card, so it is brought into view as well.

@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Settings } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Pressable, Text, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { NoteCard } from "@/components/note-card";
@@ -18,6 +18,7 @@ import { JoinRoomForm } from "./join-room-form";
 import { RoomRow } from "./room-row";
 import { useFormAboveKeyboard } from "./use-form-above-keyboard";
 import { useLiveRoomData, useRoomList } from "./use-rooms";
+import { Pressable } from "@/components/pressable";
 
 type Tab = "create" | "join";
 

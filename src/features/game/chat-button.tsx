@@ -1,12 +1,14 @@
 import { MessageCircle } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { useAuthStore } from "@/features/auth/auth-store";
 import { useRoomStore } from "@/features/room/room-store";
+import { playSound } from "@/lib/sounds";
 import { colors } from "@/theme/tokens";
 
 import { ChatSheet } from "./chat-sheet";
+import { Pressable } from "@/components/pressable";
 
 /** Space from the screen edge, and above the voting footer while it is shown. */
 const EDGE = 16;
@@ -29,6 +31,7 @@ export function ChatButton({ aboveFooter }: { aboveFooter: boolean }) {
   );
 
   const close = () => {
+    playSound("chatClose");
     setOpen(false);
     setSeen(total);
   };
@@ -38,6 +41,7 @@ export function ChatButton({ aboveFooter }: { aboveFooter: boolean }) {
       <View pointerEvents="box-none" style={{ position: "absolute", right: EDGE, bottom: EDGE + (aboveFooter ? FOOTER_HEIGHT : 0) }}>
         <Pressable
           onPress={() => setOpen(true)}
+          sound="chatOpen"
           accessibilityRole="button"
           accessibilityLabel={unread > 0 ? `Buka obrolan, ${unread} pesan baru` : "Buka obrolan"}
         >

@@ -4,6 +4,7 @@ import { Keyboard, Text, View } from "react-native";
 import { PrimaryButton } from "@/components/primary-button";
 import { TextField, type TextFieldHandle } from "@/components/text-field";
 import { submitAnswer } from "@/features/room/room-store";
+import { playSound } from "@/lib/sounds";
 import { useTimeLeft } from "@/lib/use-time-left";
 import { ANSWER_MAX, validateAnswer } from "@/shared/game";
 
@@ -78,6 +79,7 @@ export function AnswerForm({ letter, paused, onShow }: Props) {
     const result = await submitAnswer(text);
     setSending(false);
 
+    playSound(result.status === "accepted" ? "sent" : "refused");
     if (result.status === "accepted") return Keyboard.dismiss();
     // The pause gets its own line below; the alert still says what was wrong with this answer.
     if (result.retryAfterMs) setBlockedUntil(Date.now() + result.retryAfterMs);
@@ -114,6 +116,7 @@ export function AnswerForm({ letter, paused, onShow }: Props) {
         <PrimaryButton
           label={blocked ? `Tunggu ${Math.ceil(blockedMs / 1000)}` : "Kirim"}
           onPress={() => void submit()}
+          sound={null}
           disabled={sending || blocked || !text.trim()}
         />
       </View>

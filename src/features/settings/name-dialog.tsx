@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Modal, Pressable, Text, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Text, View } from "react-native";
 
 import { NoteCard } from "@/components/note-card";
 import { TextField } from "@/components/text-field";
@@ -7,6 +7,7 @@ import { setDisplayName, useAuthStore } from "@/features/auth/auth-store";
 import { ApiError } from "@/lib/api";
 import { LIMITS, USER_NAME_HINT, validateUserName } from "@/shared/game";
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 type Props = { visible: boolean; onClose: () => void };
 

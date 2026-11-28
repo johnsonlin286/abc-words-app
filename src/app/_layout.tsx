@@ -12,9 +12,12 @@ import { useEffect, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import { restoreSession, useAuthStore } from "@/features/auth/auth-store";
+import { setUpAudio } from "@/lib/sounds";
 import { colors } from "@/theme/tokens";
 
 SplashScreen.preventAutoHideAsync();
+// Other apps' music keeps playing under ours.
+setUpAudio();
 
 // TanStack Query's "window focus" on a phone is the app coming back to the foreground: refetch then
 // (e.g. room keys that refilled while the app was in the background).

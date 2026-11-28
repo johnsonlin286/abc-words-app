@@ -1,6 +1,7 @@
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 
 import { NoteCard } from "./note-card";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   visible: boolean;

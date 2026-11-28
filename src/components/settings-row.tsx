@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   label: string;

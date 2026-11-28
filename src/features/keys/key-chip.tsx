@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { KeyRow } from "./key-icon";
 import { KeysDialog } from "./keys-dialog";
 import { formatCountdown, useRoomKeys } from "./use-room-keys";
+import { Pressable } from "@/components/pressable";
 
 /** Room keys at a glance (top of the home screen): five keys, used ones faded, and the time to the next. */
 export function KeyChip() {

@@ -1,11 +1,13 @@
-import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
+import { useAudioPlayer } from "expo-audio";
 import { BellRing, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, Text, Vibration, View } from "react-native";
+import { Text, Vibration, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 
+import { usePreferences } from "@/features/preferences/preferences-store";
 import { clearPing, setReady, useRoomStore } from "@/features/room/room-store";
 import { colors, cardShadow } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 const pingSound = require("../../../assets/sounds/ping.mp3");
 
@@ -16,7 +18,8 @@ const VIBRATION = [0, 200, 100, 200];
 
 /**
  * The host called this player from the waiting room: a sound, a vibration and a note pinned to the
- * top of the screen with a one-tap "Saya Siap!". A phone on silent only vibrates.
+ * top of the screen with a one-tap "Saya Siap!". A phone on silent only vibrates; the sound and the
+ * vibration each follow their switch in Pengaturan.
  */
 export function PingAlert({ isReady }: { isReady: boolean }) {
   const ping = useRoomStore((s) => s.ping);
@@ -24,17 +27,16 @@ export function PingAlert({ isReady }: { isReady: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Other apps' music keeps playing under the call.
-    void setAudioModeAsync({ playsInSilentMode: false, interruptionMode: "mixWithOthers" }).catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (!ping) return;
-    void player
-      .seekTo(0)
-      .then(() => player.play())
-      .catch(() => {});
-    Vibration.vibrate(VIBRATION);
+    // Read at call time: the switches in Pengaturan apply to the next call.
+    const { sound, vibration } = usePreferences.getState();
+    if (sound) {
+      void player
+        .seekTo(0)
+        .then(() => player.play())
+        .catch(() => {});
+    }
+    if (vibration) Vibration.vibrate(VIBRATION);
     const timer = setTimeout(clearPing, SHOW_MS);
     return () => clearTimeout(timer);
   }, [ping, player]);

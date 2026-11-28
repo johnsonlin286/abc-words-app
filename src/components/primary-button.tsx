@@ -1,11 +1,15 @@
 import type { ReactNode } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
+import type { SoundName } from "@/lib/sounds";
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 type Props = {
   label: string;
   onPress: () => void;
+  /** Played on press ("tap"); null for a button whose action has its own sound. */
+  sound?: SoundName | null;
   loading?: boolean;
   disabled?: boolean;
   /** Shown after the label, e.g. what the action costs. */
@@ -21,6 +25,7 @@ type Props = {
 export function PrimaryButton({
   label,
   onPress,
+  sound = "tap",
   loading = false,
   disabled = false,
   accessory,
@@ -30,6 +35,7 @@ export function PrimaryButton({
   return (
     <Pressable
       onPress={onPress}
+      sound={sound}
       disabled={inactive}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}

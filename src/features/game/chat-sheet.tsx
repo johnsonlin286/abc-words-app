@@ -1,6 +1,6 @@
 import { X } from "lucide-react-native";
 import { useRef, useState, type ComponentRef } from "react";
-import { FlatList, KeyboardAvoidingView, Modal, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Modal, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PrimaryButton } from "@/components/primary-button";
@@ -10,6 +10,7 @@ import { sendMessage, useRoomStore } from "@/features/room/room-store";
 import { useTimeLeft } from "@/lib/use-time-left";
 import { LIMITS, type ChatMessage } from "@/shared/game";
 import { cardShadow, colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 /** Share of the screen the sheet covers, as on the web. */
 const SHEET_HEIGHT = 0.7;
@@ -78,7 +79,7 @@ export function ChatSheet({ onClose }: { onClose: () => void }) {
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <KeyboardAvoidingView className="flex-1" behavior="padding">
-        <Pressable onPress={onClose} accessibilityLabel="Tutup obrolan" className="flex-1 bg-ink/40" />
+        <Pressable onPress={onClose} sound={null} accessibilityLabel="Tutup obrolan" className="flex-1 bg-ink/40" />
         <SafeAreaView
           edges={["bottom"]}
           accessibilityViewIsModal
@@ -92,6 +93,8 @@ export function ChatSheet({ onClose }: { onClose: () => void }) {
             </Text>
             <Pressable
               onPress={onClose}
+              // The sheet plays its own closing sound.
+              sound={null}
               accessibilityRole="button"
               accessibilityLabel="Tutup obrolan"
               hitSlop={8}

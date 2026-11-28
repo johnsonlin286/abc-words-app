@@ -1,16 +1,7 @@
 import { router } from "expo-router";
 import { RotateCcw } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  Text,
-  useWindowDimensions,
-  View,
-  type ListRenderItem,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from "react-native";
+import { FlatList, Text, useWindowDimensions, View, type ListRenderItem, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BackButton } from "@/components/back-button";
@@ -19,6 +10,7 @@ import { PrimaryButton } from "@/components/primary-button";
 import { colors } from "@/theme/tokens";
 
 import { SLIDES, type Slide } from "./how-to-play-slides";
+import { Pressable } from "@/components/pressable";
 
 const SIDE_PADDING = 32;
 

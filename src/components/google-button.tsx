@@ -1,7 +1,8 @@
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 import { colors } from "@/theme/tokens";
+import { Pressable } from "@/components/pressable";
 
 /** Google's four-colour "G". Its colours and the white background behind it must not change. */
 function GoogleMark({ size = 22 }: { size?: number }) {
