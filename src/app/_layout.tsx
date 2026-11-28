@@ -51,20 +51,25 @@ export default function RootLayout() {
   if (!ready) return null;
 
   const signedIn = status === "signedIn";
+  // Where a guarded screen sends the player. Stated outright: with the unguarded "legal" screen in
+  // the stack, the default (the stack's anchor) would open the privacy policy instead of the login.
+  const home = !signedIn ? "/login" : !hasName ? "/choose-name" : "/";
   // Signed in -> pick a name once -> the app. Each screen is only reachable in its own state.
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.paper } }}>
-        <Stack.Protected guard={signedIn && hasName}>
+        <Stack.Protected guard={signedIn && hasName} redirectTo={home}>
           <Stack.Screen name="(app)" />
         </Stack.Protected>
-        <Stack.Protected guard={signedIn && !hasName}>
+        <Stack.Protected guard={signedIn && !hasName} redirectTo={home}>
           <Stack.Screen name="choose-name" />
         </Stack.Protected>
-        <Stack.Protected guard={!signedIn}>
+        <Stack.Protected guard={!signedIn} redirectTo={home}>
           <Stack.Screen name="login" />
         </Stack.Protected>
+        {/* Privacy policy and terms: readable before signing in too. */}
+        <Stack.Screen name="legal" />
       </Stack>
     </QueryClientProvider>
   );

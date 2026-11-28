@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -118,8 +119,24 @@ export function LoginScreen({ onGooglePress, loading = false, error = null, noti
 
           <Text className="text-center font-sans-regular text-sm leading-5 text-ink-soft">
             Dengan masuk, kamu setuju dengan{" "}
-            <Text className="font-sans-semibold text-ink underline">{"Syarat\u00a0&\u00a0Ketentuan"}</Text> dan{" "}
-            <Text className="font-sans-semibold text-ink underline">Kebijakan Privasi</Text>.
+            <Text
+              accessibilityRole="link"
+              suppressHighlighting
+              onPress={() => router.push({ pathname: "/legal", params: { doc: "syarat" } })}
+              className="font-sans-semibold text-ink underline"
+            >
+              {"Syarat\u00a0&\u00a0Ketentuan"}
+            </Text>{" "}
+            dan{" "}
+            <Text
+              accessibilityRole="link"
+              suppressHighlighting
+              onPress={() => router.push({ pathname: "/legal", params: { doc: "privasi" } })}
+              className="font-sans-semibold text-ink underline"
+            >
+              Kebijakan Privasi
+            </Text>
+            .
           </Text>
         </ScrollView>
       </SafeAreaView>

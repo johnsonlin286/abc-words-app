@@ -79,8 +79,14 @@ export function SettingsScreen() {
         <SectionTitle>Tentang</SectionTitle>
         <NoteCard className="px-4 py-1">
           <SettingsRow label="Cara bermain" onPress={() => router.push("/how-to-play")} />
-          <SettingsRow label="Kebijakan Privasi" soon />
-          <SettingsRow label="Syarat & Ketentuan" soon />
+          <SettingsRow
+            label="Kebijakan Privasi"
+            onPress={() => router.push({ pathname: "/legal", params: { doc: "privasi" } })}
+          />
+          <SettingsRow
+            label="Syarat & Ketentuan"
+            onPress={() => router.push({ pathname: "/legal", params: { doc: "syarat" } })}
+          />
           <SettingsRow label="Versi aplikasi" value={Constants.expoConfig?.version ?? "-"} last />
         </NoteCard>
       </View>
