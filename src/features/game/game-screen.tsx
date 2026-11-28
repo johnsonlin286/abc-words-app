@@ -80,8 +80,7 @@ export function GameScreen() {
               onLayout={onScrollLayout}
               onScroll={onScroll}
               scrollEventThrottle={100}
-              // Room at the bottom, so the chat button never hides the end of the page.
-              contentContainerClassName="gap-5 px-6 pb-24 pt-3"
+              contentContainerClassName="gap-5 px-6 pb-8 pt-3"
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -152,7 +151,7 @@ export function GameScreen() {
               />
             ) : null}
           </KeyboardAvoidingView>
-          {room && myId ? <ChatButton aboveFooter={phase === "voting"} /> : null}
+          {room && myId ? <ChatButton /> : null}
           {/* Only the waiting room has calls; elsewhere it would hold a sound player for nothing. */}
           {room && myId && phase === "waiting" ? (
             <PingAlert isReady={room.state.phase !== "waiting" || room.state.ready.includes(myId)} />

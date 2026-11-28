@@ -10,16 +10,16 @@ import { colors } from "@/theme/tokens";
 import { ChatSheet } from "./chat-sheet";
 import { Pressable } from "@/components/pressable";
 
-/** Space from the screen edge, and above the voting footer while it is shown. */
-const EDGE = 16;
-const FOOTER_HEIGHT = 84;
+/** How far down the screen the tab sits: clear of the score row and of the voting footer. */
+const TOP = "58%";
 
 /**
- * Chat (web chat-dock.tsx): a speech-bubble button in the bottom-right corner with the number of new
- * messages from other players, opening the chat as a sheet from the bottom. `aboveFooter` lifts it
- * over the voting footer so it never covers "Selesai Menilai".
+ * Chat (web chat-dock.tsx): a bookmark tab on the right edge of the page, like a marker sticking out
+ * of a notebook (owner's choice, 2026-11-28; the round button in the corner covered Tolak buttons).
+ * It sits in the page margin, so it never covers the game, shows the number of new messages from
+ * other players, and opens the chat as a sheet from the bottom.
  */
-export function ChatButton({ aboveFooter }: { aboveFooter: boolean }) {
+export function ChatButton() {
   const myId = useAuthStore((s) => s.user?.id);
   // Only the number of unread messages, so new messages don't redraw more than the badge.
   const total = useRoomStore((s) => s.messages.length);
@@ -38,25 +38,28 @@ export function ChatButton({ aboveFooter }: { aboveFooter: boolean }) {
 
   return (
     <>
-      <View pointerEvents="box-none" style={{ position: "absolute", right: EDGE, bottom: EDGE + (aboveFooter ? FOOTER_HEIGHT : 0) }}>
+      <View pointerEvents="box-none" style={{ position: "absolute", right: 0, top: TOP }}>
         <Pressable
           onPress={() => setOpen(true)}
           sound="chatOpen"
+          hitSlop={{ top: 4, bottom: 4, left: 16 }}
           accessibilityRole="button"
           accessibilityLabel={unread > 0 ? `Buka obrolan, ${unread} pesan baru` : "Buka obrolan"}
         >
           {({ pressed }) => (
             <View
-              className="h-14 w-14 items-center justify-center rounded-full border-2 border-ink bg-highlight"
+              className="items-center gap-1 rounded-l-lg border-2 border-r-0 border-ink bg-highlight py-3"
+              // Reaches a little over the card's edge, like a bookmark clipped onto the page (owner, 2026-11-28).
               style={{
-                boxShadow: `${pressed ? 1 : 3}px ${pressed ? 1 : 3}px 0 ${colors.ink}`,
-                transform: [{ translateX: pressed ? 2 : 0 }, { translateY: pressed ? 2 : 0 }],
+                width: 30,
+                boxShadow: `0px ${pressed ? 1 : 3}px 0 ${colors.ink}`,
+                transform: [{ translateX: pressed ? 2 : 0 }],
               }}
             >
-              <MessageCircle size={28} color={colors.ink} strokeWidth={2.5} />
+              <MessageCircle size={18} color={colors.ink} strokeWidth={2.5} />
               {unread > 0 ? (
-                <View className="absolute -right-1.5 -top-1.5 min-w-6 items-center rounded-full border-2 border-ink bg-redpen px-1">
-                  <Text className="font-sans-bold text-xs text-white">{unread > 9 ? "9+" : unread}</Text>
+                <View className="min-w-4 items-center rounded-full bg-redpen px-0.5">
+                  <Text className="font-sans-bold text-[11px] text-white">{unread > 99 ? "99+" : unread}</Text>
                 </View>
               ) : null}
             </View>
