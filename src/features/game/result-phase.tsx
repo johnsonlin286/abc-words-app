@@ -9,8 +9,8 @@ import { colors } from "@/theme/tokens";
 
 import { CrossedText } from "./crossed-text";
 import { RejectedBy } from "./rejected-by";
+import { OtherCategoryNote } from "./other-category-note";
 import { RoundHeader } from "./round-header";
-import { strikeLabel, WarningIcon } from "./warning-badge";
 
 type Answer = GameRoomView["state"]["answers"][number];
 
@@ -19,18 +19,10 @@ const STAGGER_MS = 60;
 
 const PENALTY_POINTS: Record<Penalty["reason"], number> = {
   "no-answer": POINTS.noAnswer,
-  "lone-rejection": POINTS.loneRejection,
 };
 
 function penaltyText(p: Penalty): string {
-  return p.reason === "no-answer" ? `${p.name} tidak menjawab` : `${p.name} menolak "${p.answerText}" sendirian`;
-}
-
-/** What a lone rejection means for the player, so a warning is never a surprise. */
-function strikeNote(p: Penalty): string {
-  return p.warning
-    ? `Belum ada potongan poin. Sekali lagi menolak sendirian dianggap sengaja: ${formatPoints(POINTS.loneRejection)} poin.`
-    : `Sudah ${p.strike ?? 0}× menolak sendirian, dianggap sengaja (${strikeLabel(p.strike ?? 0)}).`;
+  return `${p.name} tidak menjawab`;
 }
 
 /** The rule's points, so a penalty never looks like "0"; see `FloorNote`. */
@@ -75,6 +67,7 @@ function ResultRow({ answer }: { answer: Answer }) {
             </Text>
             {answer.verified ? <VerifiedBadge compact /> : null}
           </View>
+          {answer.otherCategory ? <OtherCategoryNote category={answer.otherCategory} /> : null}
           {(answer.points ?? 0) !== rule ? <FloorNote /> : null}
         </View>
         <View
@@ -123,24 +116,14 @@ export function ResultPhase({ room, letter }: { room: GameRoomView; letter: stri
           </Text>
           {penalties.map((p) => (
             <View
-              key={`${p.reason}-${p.userId}-${p.answerText ?? ""}`}
+              key={`${p.reason}-${p.userId}`}
               className="flex-row items-center justify-between gap-3 rounded-xl border-2 border-dashed border-redpen bg-white px-3 py-1.5"
             >
               <View className="flex-1">
                 <Text className="font-sans-semibold text-sm text-ink">{penaltyText(p)}</Text>
-                {p.reason === "lone-rejection" ? (
-                  <Text className="font-sans text-xs leading-4 text-ink-soft">{strikeNote(p)}</Text>
-                ) : null}
-                {!p.warning && p.points !== PENALTY_POINTS[p.reason] ? <FloorNote /> : null}
+                {p.points !== PENALTY_POINTS[p.reason] ? <FloorNote /> : null}
               </View>
-              {p.warning ? (
-                <View className="flex-row items-center gap-1.5">
-                  <WarningIcon />
-                  <Text className="font-sans-bold text-sm text-ink">Peringatan {strikeLabel(p.strike ?? 0)}</Text>
-                </View>
-              ) : (
-                <Points rule={PENALTY_POINTS[p.reason]} lost />
-              )}
+              <Points rule={PENALTY_POINTS[p.reason]} lost />
             </View>
           ))}
         </View>

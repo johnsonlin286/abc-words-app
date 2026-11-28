@@ -5,14 +5,15 @@ import { Text, View } from "react-native";
 import { PrimaryButton } from "@/components/primary-button";
 import { SecondaryButton } from "@/components/secondary-button";
 import { setVotingDone, type GameRoomView } from "@/features/room/room-store";
+import { isJudgeable } from "@/shared/game";
 import { colors } from "@/theme/tokens";
 
 import { isAfk } from "./afk";
 
-/** Same rule as the server: online, with someone else's unverified answer to judge. */
+/** Same rule as the server: online, with someone else's answer to judge (not verified, not auto-failed). */
 function canJudge({ members, state }: GameRoomView, userId: string): boolean {
   const member = members.find((m) => m.userId === userId);
-  return !!member?.isConnected && state.answers.some((a) => a.userId !== userId && !a.verified);
+  return !!member?.isConnected && state.answers.some((a) => a.userId !== userId && isJudgeable(a));
 }
 
 /** The judges voting waits for (server `judgesOf`): AFK players may judge, but aren't waited for. */

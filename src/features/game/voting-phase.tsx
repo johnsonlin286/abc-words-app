@@ -6,14 +6,15 @@ import { VerifiedBadge } from "@/components/verified-badge";
 import { useAuthStore } from "@/features/auth/auth-store";
 import { playSound } from "@/lib/sounds";
 import { setRejection, useRoomStore, type GameRoomView } from "@/features/room/room-store";
-import { formatPoints, LONE_REJECTION_WARNINGS, POINTS, REJECT_REASONS, type RejectReason } from "@/shared/game";
+import { formatPoints, POINTS, REJECT_REASONS, UNCHECKED_CATEGORY_NOTE, type RejectReason } from "@/shared/game";
 import { colors } from "@/theme/tokens";
 
 import { Countdown } from "./countdown";
+import { CrossedText } from "./crossed-text";
 import { InfoBadge } from "./info-badge";
+import { OtherCategoryNote } from "./other-category-note";
 import { RejectedBy } from "./rejected-by";
 import { RoundHeader } from "./round-header";
-import { WarningIcon, warningText } from "./warning-badge";
 import { Pressable } from "@/components/pressable";
 
 type Answer = GameRoomView["state"]["answers"][number];
@@ -31,12 +32,14 @@ type Props = {
 };
 
 /** The rules of judging, behind the info button so the answers get the room. */
-function rulesText(oneJudge: boolean, anyVerified: boolean): string {
+function rulesText(oneJudge: boolean, anyVerified: boolean, anyOther: boolean): string {
   const rejecting = oneJudge
     ? "Kalian main berdua: jawaban yang kamu tolak langsung gugur, tapi tanpa pengurangan poin. Jatah tolak tidak dikembalikan."
-    : `Jawaban yang gugur ${formatPoints(POINTS.rejected)} poin. Tolakan yang disetujui pemain lain dikembalikan ke jatahmu. Menolak sendirian jawaban yang tetap lolos, mulai kali ke-${LONE_REJECTION_WARNINGS + 1}: ${formatPoints(POINTS.loneRejection)} poin.`;
-  const verified = "Jawaban Terverifikasi ada di daftar kategori ini, jadi langsung lolos dan tidak bisa ditolak.";
-  return anyVerified ? `${rejecting}\n\n${verified}` : rejecting;
+    : `Jawaban yang gugur ${formatPoints(POINTS.rejected)} poin. Tolakan yang disetujui pemain lain dikembalikan ke jatahmu. Menolak sendirian tidak dihukum.`;
+  const parts = [rejecting];
+  if (anyVerified) parts.push("Jawaban Terverifikasi ada di daftar kategori ini, jadi langsung lolos dan tidak bisa ditolak.");
+  if (anyOther) parts.push("Jawaban dari daftar kategori lain langsung gugur tanpa voting.");
+  return parts.join("\n\n");
 }
 
 /** "Salah ejaan" on a button: every word capitalized. */
@@ -56,7 +59,8 @@ export function VotingPhase({ room, letter, onReasonsShown, listRef, onListLayou
 
   const { answers, rejectionsLeft, phaseMs } = room.state;
   const anyVerified = answers.some((a) => a.verified);
-  const myLoneRejections = (myId && room.state.loneRejections[myId]) || 0;
+  const anyOther = answers.some((a) => a.otherCategory !== null);
+  const unchecked = room.settings.category === "custom";
   // Same rule as the server: with two players online, each answer has one judge.
   const oneJudge = room.members.filter((m) => m.isConnected).length === 2;
 
@@ -70,7 +74,7 @@ export function VotingPhase({ room, letter, onReasonsShown, listRef, onListLayou
           <Text accessibilityRole="header" className="shrink font-sans-bold text-lg text-ink">
             Coret yang salah!
           </Text>
-          <InfoBadge label="Aturan menilai" explanation={rulesText(oneJudge, anyVerified)}>
+          <InfoBadge label="Aturan menilai" explanation={rulesText(oneJudge, anyVerified, anyOther)}>
             <Info size={20} color={colors.inkSoft} strokeWidth={2.5} />
           </InfoBadge>
         </View>
@@ -82,16 +86,7 @@ export function VotingPhase({ room, letter, onReasonsShown, listRef, onListLayou
       {oneJudge ? (
         <Text className="font-sans text-sm text-ink-soft">Main berdua: tolakanmu langsung menggugurkan.</Text>
       ) : null}
-      {myLoneRejections >= LONE_REJECTION_WARNINGS ? (
-        <View className="flex-row items-start gap-1.5">
-          <View className="pt-0.5">
-            <WarningIcon />
-          </View>
-          <Text className="flex-1 font-sans-semibold text-sm leading-5 text-redpen">
-            {warningText(myLoneRejections, null)}
-          </Text>
-        </View>
-      ) : null}
+      {unchecked ? <Text className="font-sans text-sm text-ink-soft">{UNCHECKED_CATEGORY_NOTE}</Text> : null}
 
       <View ref={listRef} collapsable={false} onLayout={() => onListLayout(String(room.state.round))} className="gap-2">
         {answers.map((a) => (
@@ -126,7 +121,8 @@ function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReaso
   const [error, setError] = useState<string | null>(null);
   const isMine = answer.userId === myId;
   const mine = answer.rejectedBy.find((r) => r.userId === myId);
-  const showReasons = !isMine && !answer.verified && (mine !== undefined || choosing);
+  const autoFailed = answer.otherCategory !== null;
+  const showReasons = !isMine && !answer.verified && !autoFailed && (mine !== undefined || choosing);
 
   const send = async (reason: RejectReason | null) => {
     // The red-pen scribble when rejecting; taking it back is quiet.
@@ -146,14 +142,24 @@ function AnswerRow({ answer, myId, choosing, noRejectionsLeft, onChoose, onReaso
     >
       <View className="flex-row items-center justify-between gap-2">
         <View className="flex-1">
-          <Text className="font-sans-bold text-lg leading-6 text-ink">{answer.text}</Text>
+          {autoFailed ? (
+            // Failed by the word lists: crossed out at once, like a failed answer on the result.
+            <View className="flex-row">
+              <View className="shrink">
+                <CrossedText text={answer.text} className="text-lg leading-6" />
+              </View>
+            </View>
+          ) : (
+            <Text className="font-sans-bold text-lg leading-6 text-ink">{answer.text}</Text>
+          )}
           <Text numberOfLines={1} className="font-sans text-sm text-ink-soft">
             {isMine ? "Jawabanmu" : answer.name}
           </Text>
+          {answer.otherCategory ? <OtherCategoryNote category={answer.otherCategory} /> : null}
         </View>
         {answer.verified ? (
           <VerifiedBadge />
-        ) : isMine ? null : (
+        ) : isMine || autoFailed ? null : (
           <RejectButton
             label={mine ? "Batal Tolak" : choosing ? "Batal" : "Tolak"}
             word={answer.text}

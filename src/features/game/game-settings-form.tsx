@@ -13,6 +13,7 @@ import {
   CUSTOM_CATEGORY_MAX,
   MAX_ROUNDS,
   type GameSettings,
+  UNCHECKED_CATEGORY_NOTE,
 } from "@/shared/game";
 import { colors } from "@/theme/tokens";
 import { Pressable } from "@/components/pressable";
@@ -51,6 +52,9 @@ export function GameSettingsForm({ settings }: { settings: GameSettings }) {
             value={settings.customCategory}
             onSave={(customCategory) => void save({ customCategory })}
           />
+        ) : null}
+        {settings.category === "custom" ? (
+          <Text className="font-sans text-sm text-ink-soft">{UNCHECKED_CATEGORY_NOTE}</Text>
         ) : null}
       </View>
 
@@ -152,6 +156,9 @@ export function RulesSummary({ settings }: { settings: GameSettings }) {
         <Rule label="Jumlah ronde" value={`${settings.maxRounds} ronde`} />
         <Rule label="Waktu menjawab" value={`${settings.answerSeconds} detik`} last />
       </View>
+      {settings.category === "custom" ? (
+        <Text className="font-sans text-sm text-ink-soft">{UNCHECKED_CATEGORY_NOTE}</Text>
+      ) : null}
       <Text className="font-sans text-sm text-ink-faint">Diatur oleh host.</Text>
     </View>
   );

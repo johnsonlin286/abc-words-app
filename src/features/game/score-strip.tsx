@@ -5,7 +5,6 @@ import type { GameRoomView } from "@/features/room/room-store";
 import { rankPlayers } from "@/shared/game";
 
 import { AfkBadge, isAfk } from "./afk";
-import { WarningBadge } from "./warning-badge";
 
 /**
  * Running score on one row above the game, however many players there are: your own score is always
@@ -43,7 +42,6 @@ export function ScoreStrip({ room }: { room: GameRoomView }) {
             <Text numberOfLines={1} className="max-w-28 font-sans-semibold text-sm text-ink">
               {p.name}
             </Text>
-            <WarningBadge count={room.state.loneRejections[p.userId] ?? 0} name={p.name} />
             {isAfk(room.state, p.userId) ? <AfkBadge name={p.name} /> : null}
             <View className="min-w-6 items-center rounded-full bg-highlight px-1.5">
               <Text accessibilityLabel={`${p.score} poin`} className="font-sans-bold text-sm text-ink">
