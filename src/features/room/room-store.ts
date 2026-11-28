@@ -58,6 +58,14 @@ type RoomState = {
   chatMutedUntil: number | null;
 };
 
+/**
+ * Said in the lobby when a reconnect finds us in no room although we were in one: the server
+ * restarted (rooms live in memory) or we were away longer than the seat is kept.
+ */
+function lostRoomNotice(roomId: string | null): string | null {
+  return roomId ? `Sambungan ke room ${roomId} terputus. Gabung lagi dengan kodenya atau buat room baru.` : null;
+}
+
 const NO_ROOM = {
   roomId: null,
   room: null,
@@ -144,7 +152,8 @@ function bindSocket(): GameSocket {
   // Sent after every successful (re)connect; the server restores our room by itself.
   s.on("session", (session) => {
     // No room: e.g. it expired or the server restarted. Otherwise `room:state` follows.
-    set(session.roomId ? { ready: true, roomId: session.roomId } : { ready: true, ...NO_ROOM });
+    if (session.roomId) set({ ready: true, roomId: session.roomId });
+    else set({ ready: true, ...NO_ROOM, notice: lostRoomNotice(useRoomStore.getState().roomId) });
   });
   // Full snapshot of our room: the source of truth.
   s.on("room:state", (room) => showRoom(room as GameRoomView));
@@ -208,7 +217,7 @@ export async function resumeGame(): Promise<void> {
     try {
       const room = await request("room:sync");
       if (room) showRoom(room as GameRoomView);
-      else set(NO_ROOM);
+      else set({ ...NO_ROOM, notice: lostRoomNotice(useRoomStore.getState().roomId) });
       return;
     } catch {
       // No answer: the connection died while the app slept.
